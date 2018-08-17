@@ -26,9 +26,9 @@ python main.py -c input_params.json
 
 ## Acknowledgements
 
-Jun-Yan Zhu https://github.com/junyanz/CycleGAN
-Erik Linder-Norén https://github.com/eriklindernoren/Keras-GAN
-HagopB https://github.com/HagopB/cyclegan
+* Jun-Yan Zhu https://github.com/junyanz/CycleGAN
+* Erik Linder-Norén https://github.com/eriklindernoren/Keras-GAN
+* HagopB https://github.com/HagopB/cyclegan
 
 
 
