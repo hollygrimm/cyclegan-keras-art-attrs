@@ -13,7 +13,7 @@ cd keras-contrib
 python setup.py install
 ```
 
-Pre-trained ResNet50 Model with Art Composition Attributes: https://github.com/art-composition-cnn
+Pre-trained ResNet50 Model with Art Composition Attributes: https://github.com/hollygrimm/art-composition-cnn
 
 ## Download Dataset
 $ bash download_dataset.sh apple2orange
@@ -24,6 +24,11 @@ python main.py -c input_params.json
 ```
 
 
+## Acknowledgements
+
+Jun-Yan Zhu https://github.com/junyanz/CycleGAN
+Erik Linder-Norén https://github.com/eriklindernoren/Keras-GAN
+HagopB https://github.com/HagopB/cyclegan
 
 
-https://github.com/junyanz/CycleGAN
+
