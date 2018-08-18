@@ -29,6 +29,7 @@ python main.py -c input_params.json
 * Jun-Yan Zhu https://github.com/junyanz/CycleGAN
 * Erik Linder-Norén https://github.com/eriklindernoren/Keras-GAN
 * HagopB https://github.com/HagopB/cyclegan
+* Ulyanov et al Instance Normalization: The Missing Ingredient for Fast Stylization https://arxiv.org/pdf/1607.08022.pdf
 
 
 
