@@ -83,8 +83,8 @@ class CycleGANAttrModel(BaseModel):
         self.df = 64
 
         # Loss weights
-        self.lambda_cycle = 10.0                    # Cycle-consistency loss
-        self.lambda_id = 0.1 * self.lambda_cycle    # Identity loss
+        self.lambda_cycle = 10.0                    # Cycle-consistency loss, same as in orig paper
+        self.lambda_id = 0.1 * self.lambda_cycle    # Identity loss  .5 for monet and flower in orig paper
 
         #Optimizer
         optimizer = Adam(lr=self.base_lr, beta_1=self.beta_1)

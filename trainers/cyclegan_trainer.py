@@ -2,8 +2,10 @@ import os
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
-from keras.callbacks import ModelCheckpoint, TensorBoard
+import tensorflow as tf
+from keras.callbacks import ModelCheckpoint
 from base.base_trainer import BaseTrain
+from trainers.tensorboard_batch_monitor import TensorBoardBatchMonitor
 from trainers.data_generator import DataGenerator
 
 class CycleGANModelTrainer(BaseTrain):
@@ -31,7 +33,7 @@ class CycleGANModelTrainer(BaseTrain):
         )
 
         self.callbacks.append(
-            TensorBoard(
+            TensorBoardBatchMonitor(
                 log_dir = self.tensorboard_log_dir,
                 write_graph = self.config['tensorboard_write_graph'],
                 histogram_freq = 0, # don't compute histograms
@@ -47,8 +49,6 @@ class CycleGANModelTrainer(BaseTrain):
             self.callbacks.append(experiment.get_keras_callback())      
 
     def train(self, sample_interval=200):
-        # TODO: Add callbacks
-
         start_time = datetime.datetime.now()
         epoch = 0
         epochs = self.config['nb_epoch']
@@ -63,13 +63,18 @@ class CycleGANModelTrainer(BaseTrain):
         steps_per_epoch = len(trainA_datagen)
         print(steps_per_epoch)
 
+        self.callbacks[0].set_model(self.model.combined)
+        self.callbacks[1].set_model(self.model.combined)
+
+        batch_logs = {}
         for epoch in range(epochs):
+            print("start of epoch {}".format(epoch))
             steps_done = 0
             trainA_generator = iter(trainA_datagen)
             trainB_generator = iter(trainB_datagen)
             while steps_done < steps_per_epoch:
                 imgs_A = next(trainA_generator)
-                imgs_B= next(trainB_generator)
+                imgs_B = next(trainB_generator)
 
                 # Translate images to opposite domain
                 fake_B = self.model.g_AB.predict(imgs_A)
@@ -93,21 +98,16 @@ class CycleGANModelTrainer(BaseTrain):
                                                         imgs_A, imgs_B,
                                                         imgs_A, imgs_B])
 
-                elapsed_time = datetime.datetime.now() - start_time
+                batch_logs['D Loss'] = d_loss[0]
+                batch_logs['D Acc'] = 100*d_loss[1]
+                batch_logs['G Loss'] = g_loss[0]
+                batch_logs['G Adversarial Loss'] = np.mean(g_loss[1:3])
+                batch_logs['G Cycle-Consistency Loss'] = np.mean(g_loss[3:5]) # if we translate from one domain to another, and then back again
+                batch_logs['G Identity Loss'] = np.mean(g_loss[5:6]) # real samples of the target domain (e.g. img_A) is provided as input to the generator (B->A) 
 
-                # Plot the progress
-                print ("[Epoch %d/%d] [Batch %d/%d] [D loss: %f, acc: %3d%%] [G loss: %05f, adv: %05f, recon: %05f, id: %05f] time: %s " \
-                                                                        % ( epoch, epochs,
-                                                                            steps_done, steps_per_epoch,
-                                                                            d_loss[0], 100*d_loss[1],
-                                                                            g_loss[0],
-                                                                            np.mean(g_loss[1:3]),
-                                                                            np.mean(g_loss[3:5]),
-                                                                            np.mean(g_loss[5:6]),
-                                                                            elapsed_time))
+                self.callbacks[1].on_batch_end((epoch * steps_per_epoch) + steps_done, batch_logs)
 
                 steps_done += 1
-                print(steps_done)
 
                 # If at save interval => save generated image samples
                 if steps_done % sample_interval == 0:
