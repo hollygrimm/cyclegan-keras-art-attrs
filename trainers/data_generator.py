@@ -31,7 +31,6 @@ class DataGenerator(Sequence):
 
         # Get filenames and labels for batch
         img_filenames_temp = [self.img_filenames[k] for k in indexes]
-        print(img_filenames_temp)
         # Generate data
         X = self.__data_generation(img_filenames_temp)
 
