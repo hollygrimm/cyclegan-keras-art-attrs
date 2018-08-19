@@ -3,7 +3,7 @@
 
     "dataset_name": "apple2orange",
 
-    "img_size": 128,
+    "img_size": 256,
 
     "base_lr": 1e-04, 
     "beta_1": 0.5,

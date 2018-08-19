@@ -1,5 +1,6 @@
 
 from base.base_model import BaseModel
+import keras.backend as k
 from keras_contrib.layers.normalization import InstanceNormalization
 from keras.layers import Input, Dense, Dropout
 from keras.layers.advanced_activations import LeakyReLU
@@ -7,6 +8,7 @@ from keras.layers.convolutional import UpSampling2D, Conv2D
 from keras.layers.merge import Concatenate
 from keras.models import Model
 from keras.optimizers import Adam
+from keras.applications.resnet50 import ResNet50
 
 class CycleGANAttrModel(BaseModel):
     def __init__(self, config):
@@ -73,6 +75,24 @@ class CycleGANAttrModel(BaseModel):
 
         return Model(img, validity)
 
+    def build_perceptual_model(self, input_shape, trainable=False, pop=True):
+        # import ResNet50 pretrained on imagenet
+        model = ResNet50(include_top=False, weights='imagenet', input_shape=input_shape)
+        if pop == True:
+            model.layers.pop() # pop pooling layer
+            model.layers.pop() # pop last activation layer
+
+        for layer in model.layers:
+            layer.trainable = trainable
+        
+        print('Resnet50 for Perceptual loss:')
+        model.summary()
+        return model
+
+    def mse_loss(self, y_true, y_pred):
+        loss = k.mean(k.square(y_true - y_pred))
+        return loss
+
     def build_model(self):
         # Calculate output shape of the Discriminator (PatchGAN)
         patch = int(self.img_size / 2**4)
@@ -83,8 +103,9 @@ class CycleGANAttrModel(BaseModel):
         self.df = 64
 
         # Loss weights
-        self.lambda_cycle = 10.0                    # Cycle-consistency loss, same as in orig paper
-        self.lambda_id = 0.1 * self.lambda_cycle    # Identity loss  .5 for monet and flower in orig paper
+        self.lambda_cycle = 10.0                    # Cycle-consistency loss weight, same as in orig paper
+        self.lambda_id = 0.1 * self.lambda_cycle    # Identity loss weight .5 lambda for monet and flower in orig paper
+        self.lambda_feature = 1.0
 
         #Optimizer
         optimizer = Adam(lr=self.base_lr, beta_1=self.beta_1)
@@ -103,6 +124,9 @@ class CycleGANAttrModel(BaseModel):
         self.g_AB = self.build_generator()
         self.g_BA = self.build_generator()
 
+        # Build the Perceptual Model
+        self.model_perceptual = self.build_perceptual_model(input_shape=self.img_shape)
+
         # Input images from both domains
         img_A = Input(shape=self.img_shape)
         img_B = Input(shape=self.img_shape)
@@ -119,6 +143,12 @@ class CycleGANAttrModel(BaseModel):
         img_A_id = self.g_BA(img_A)
         img_B_id = self.g_AB(img_B)
 
+        # Perceptual Feature Loss
+        percept_A = self.model_perceptual([img_A])
+        percept_B = self.model_perceptual([img_B])
+        percept_reconstr_A = self.model_perceptual([reconstr_A])
+        percept_reconstr_B = self.model_perceptual([reconstr_B])
+
         # For the combined model we will only train the generators
         self.d_A.trainable = False
         self.d_B.trainable = False
@@ -129,17 +159,26 @@ class CycleGANAttrModel(BaseModel):
 
         # Combined model trains generators to fool discriminators
         self.combined = Model(inputs=[img_A, img_B],
-                              outputs=[ valid_A, valid_B,
-                                        reconstr_A, reconstr_B,
-                                        img_A_id, img_B_id ])
+                              outputs=[ valid_A, valid_B, # d_A(g_BA(img_B), d_B(g_AB(img_A))
+                                        reconstr_A, reconstr_B,  # g_BA(g_AB(img_A)), g_AB(g_BA(img_B))
+                                        img_A_id, img_B_id, # g_BA(img_A), g_AB(img_B)
+                                        percept_A, percept_B,
+                                        percept_reconstr_A, percept_reconstr_B,
+                                        percept_reconstr_A, percept_reconstr_B ]) 
 
         if self.weights_path:
             self.model.load_weights(self.weights_path)
 
         self.combined.compile(loss=['mse', 'mse',
                                     'mae', 'mae',
-                                    'mae', 'mae'],
+                                    'mae', 'mae',
+                                    'mse', 'mse',
+                                    'mse', 'mse',
+                                    'mse', 'mse'],
                             loss_weights=[  1, 1,
                                             self.lambda_cycle, self.lambda_cycle,
-                                            self.lambda_id, self.lambda_id ],
+                                            self.lambda_id, self.lambda_id,
+                                            self.lambda_feature, self.lambda_feature,
+                                            self.lambda_feature, self.lambda_feature,
+                                            self.lambda_feature, self.lambda_feature ],
                             optimizer=optimizer)
