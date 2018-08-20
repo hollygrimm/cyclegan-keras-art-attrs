@@ -89,22 +89,34 @@ class CycleGANModelTrainer(BaseTrain):
                 dB_loss_fake = self.model.d_B.train_on_batch(fake_B, fake)
                 dB_loss = 0.5 * np.add(dB_loss_real, dB_loss_fake)
 
-                percept_A = self.model.model_perceptual.predict(imgs_A)
-                percept_B = self.model.model_perceptual.predict(imgs_B)
-                percept_fake_A = self.model.model_perceptual.predict(fake_A)
-                percept_fake_B = self.model.model_perceptual.predict(fake_B)
+                outputs = [valid, valid, # y: ones
+                           imgs_A, imgs_B, # compare g_BA(g_AB(img_A)) to y: imgs_A, g_AB(g_BA(img_B)) to y: imgs_B
+                           imgs_A, imgs_B, # compare g_BA(img_A) to y: imgs_A, compare g_AB(img_B) to y: imgs_B
+                          ]
+
+                if self.config['add_perceptual_loss']:
+                    percept_A = self.model.model_perceptual.predict(imgs_A)
+                    percept_B = self.model.model_perceptual.predict(imgs_B)
+                    percept_fake_A = self.model.model_perceptual.predict(fake_A)
+                    percept_fake_B = self.model.model_perceptual.predict(fake_B)
+
+                    outputs.extend([percept_fake_B, percept_fake_A,
+                                   percept_fake_A, percept_fake_B,
+                                   percept_A, percept_B])
+
+                if self.config['target_attr_values']:
+                    attr_outputs = []
+                    for k, value in self.config['target_attr_values'].items():
+                        target_values = np.ones((batch_size, )) * value
+                        attr_outputs.extend([target_values, target_values])
+                    outputs.extend(attr_outputs)
 
                 # Combine discriminator loss
                 d_loss = 0.5 * np.add(dA_loss, dB_loss)
 
                 # Train the generators
                 g_loss = self.model.combined.train_on_batch([imgs_A, imgs_B],
-                                                        [valid, valid, # y: ones
-                                                        imgs_A, imgs_B, # compare g_BA(g_AB(img_A)) to y: imgs_A, g_AB(g_BA(img_B)) to y: imgs_B
-                                                        imgs_A, imgs_B, # compare g_BA(img_A) to y: imgs_A, compare g_AB(img_B) to y: imgs_B
-                                                        percept_fake_B, percept_fake_A,
-                                                        percept_fake_A, percept_fake_B,
-                                                        percept_A, percept_B])
+                                                        outputs)
 
                 batch_logs['D Loss'] = d_loss[0]
                 batch_logs['D Acc'] = 100*d_loss[1]
@@ -112,14 +124,23 @@ class CycleGANModelTrainer(BaseTrain):
                 batch_logs['G Adversarial Loss'] = np.mean(g_loss[1:3])
                 batch_logs['G Cycle-Consistency Loss'] = np.mean(g_loss[3:5]) # if we translate from one domain to another, and then back again
                 batch_logs['G Identity Loss'] = np.mean(g_loss[5:6]) # real samples of the target domain (e.g. img_A) is provided as input to the generator (B->A)
-                batch_logs['G Feature Loss Fake B'] = g_loss[7]
-                batch_logs['G Feature Loss Fake A'] = g_loss[8]
-                batch_logs['G Feature Loss Fake A Recon B'] = g_loss[9]
-                batch_logs['G Feature Loss Fake B Recon A'] = g_loss[10]
-                batch_logs['G Feature Loss Real B Recon A'] = g_loss[11]
-                batch_logs['G Feature Loss Real B Recon B'] = g_loss[12]
+                
+                loss_index = 0
+                if self.config['add_perceptual_loss']:
+                    batch_logs['G Feature Loss Fake B'] = g_loss[7]
+                    batch_logs['G Feature Loss Fake A'] = g_loss[8]
+                    batch_logs['G Feature Loss Fake A Recon B'] = g_loss[9]
+                    batch_logs['G Feature Loss Fake B Recon A'] = g_loss[10]
+                    batch_logs['G Feature Loss Real B Recon A'] = g_loss[11]
+                    batch_logs['G Feature Loss Real B Recon B'] = g_loss[12]
+                    loss_index += 6
 
+                if self.config['target_attr_values']:
+                    for i in range(len(self.config['target_attr_values'])):
+                        batch_logs['G Attr{} Loss Fake A'.format(i)] = g_loss[7 + i + loss_index]
+                        batch_logs['G Attr{} Loss Fake B'.format(i)] = g_loss[8 + i + loss_index]
 
+                # FIXME: Add save model checkpoint
                 self.callbacks[1].on_batch_end((epoch * steps_per_epoch) + steps_done, batch_logs)
 
                 steps_done += 1

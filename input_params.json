@@ -1,5 +1,5 @@
 {
-    "exp_name": "200_128_1e-04_1",
+    "exp_name": "200_256_1e-04_1_comp_attrs",
 
     "dataset_name": "apple2orange",
 
@@ -14,6 +14,10 @@
     "nb_epoch": 200,
     "validation_split": 0.25,
     "verbose_training": 2,
+
+    "add_perceptual_loss": false,
+
+    "comp_attrs_weights_path": "data/20_256_1e-04_2-09-0.50.hdf5",
     "loss_weights": {
         "variety_texture": 0.5,
         "variety_shape": 0.5,
@@ -22,6 +26,14 @@
         "contrast": 0.5,
         "repetition": 0.5
     }, 
+    "target_attr_values": {
+        "variety_texture": 1,
+        "variety_shape": 1,
+        "variety_size": 1,
+        "variety_color": 1,
+        "contrast": 10,
+        "repetition": 1
+    },     
 
     "checkpoint_monitor": "val_loss",
     "checkpoint_mode": "min",

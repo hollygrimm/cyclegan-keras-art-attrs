@@ -1,6 +1,6 @@
 
 from base.base_model import BaseModel
-import keras.backend as k
+import keras.backend as K
 from keras_contrib.layers.normalization import InstanceNormalization
 from keras.layers import Input, Dense, Dropout
 from keras.layers.advanced_activations import LeakyReLU
@@ -9,6 +9,8 @@ from keras.layers.merge import Concatenate
 from keras.models import Model
 from keras.optimizers import Adam
 from keras.applications.resnet50 import ResNet50
+from keras.layers import Lambda, GlobalAveragePooling2D
+from keras.optimizers import Adagrad
 
 class CycleGANAttrModel(BaseModel):
     def __init__(self, config):
@@ -20,6 +22,9 @@ class CycleGANAttrModel(BaseModel):
         self.base_lr = config['base_lr']
         self.beta_1 = config['beta_1']
         self.loss_weights = config['loss_weights']
+        self.target_attr_values = config['target_attr_values']
+        self.comp_attrs_weights_path = config['comp_attrs_weights_path']
+        self.add_perceptual_loss = config['add_perceptual_loss']
         self.build_model()
 
     def build_generator(self):
@@ -89,8 +94,94 @@ class CycleGANAttrModel(BaseModel):
         model.summary()
         return model
 
+    def l2_normalize(self, x):
+        """Apply L2 Normalization
+
+        Args:
+            x (tensor): output of convolution layer
+        """        
+        return K.l2_normalize(x, 0)
+
+    def l2_normalize_output_shape(self, input_shape):
+        return input_shape
+
+    def global_average_pooling(self, x):
+        """Apply global average pooling
+
+        Args:
+            x (tensor): output of convolution layer
+        """
+        x = GlobalAveragePooling2D()(x)
+        return x
+
+    def global_average_pooling_output_shape(self, input_shape):
+        return (input_shape[0], input_shape[-1])
+
+    def build_comp_attr_model(self, input_shape, trainable=False):
+        _input = Input(shape=input_shape)
+        resnet = ResNet50(include_top=False, weights='imagenet', input_tensor=_input)
+        activation_layers = []
+        layers = resnet.layers
+        for layer in layers:
+            if 'activation' in layer.name:
+                activation_layers.append(layer)
+
+        activations = 0
+        activations_gap_plus_lastactivation_gap_l2 = []
+        # Create GAP layer for the activation layer at the end of each ResNet block, except for last one
+        nlayers = len(activation_layers) - 1
+        for i in range(1, nlayers):
+            layer = activation_layers[i]
+            # three activations per block, select only the last one
+            if layer.output_shape[-1] > activation_layers[i - 1].output_shape[-1]:
+                # print(layer.name, layer.input_shape, layer.output_shape[-1], activation_layers[i - 1].output_shape[-1])
+                activations += layer.output_shape[-1]
+                _out = Lambda(self.global_average_pooling,
+                            output_shape=self.global_average_pooling_output_shape, name=layer.name + '_gap')(layer.output)
+                activations_gap_plus_lastactivation_gap_l2.append(_out)
+
+        print("sum of all activations should be 13056: {}".format(activations))
+
+        last_layer_output = GlobalAveragePooling2D()(activation_layers[-1].output)
+
+        last_layer_output = Lambda(self.l2_normalize, output_shape=self.l2_normalize_output_shape,
+                                name=activation_layers[-1].name+'_gap')(last_layer_output)
+
+        activations_gap_plus_lastactivation_gap_l2.append(last_layer_output)
+
+        merged = Concatenate(axis=1)(activations_gap_plus_lastactivation_gap_l2)
+        print("merged shape should be (?, 15104): ", merged.shape)
+        merged = Lambda(self.l2_normalize, output_shape=self.l2_normalize_output_shape, name='merge')(merged)
+
+        # create an output for each attribute
+        outputs = []
+
+        attrs = [k for k in self.loss_weights]
+        for attr in attrs:
+            outputs.append(Dense(1, kernel_initializer='glorot_uniform', activation='tanh', name=attr)(merged))
+
+        non_negative_attrs = []
+        for attr in non_negative_attrs:
+            outputs.append(Dense(1, kernel_initializer='glorot_uniform', activation='sigmoid', name=attr)(merged))
+
+        comp_attr_model = Model(inputs=_input, outputs=outputs)
+        if self.comp_attrs_weights_path:
+            print("comp_attrs_weights_path loaded")
+            comp_attr_model.load_weights(self.comp_attrs_weights_path)
+        else:
+            print("comp_attrs_weights_path required for training on attributes")
+
+        for layer in comp_attr_model.layers:
+            comp_attr_model.trainable = trainable
+
+        print('Resnet50 for Compositional Attributes loss:')
+        comp_attr_model.summary()
+        
+        return comp_attr_model
+              
+
     def mse_loss(self, y_true, y_pred):
-        loss = k.mean(k.square(y_true - y_pred))
+        loss = K.mean(K.square(y_true - y_pred))
         return loss
 
     def build_model(self):
@@ -106,6 +197,7 @@ class CycleGANAttrModel(BaseModel):
         self.lambda_cycle = 10.0                    # Cycle-consistency loss weight, same as in orig paper
         self.lambda_id = 0.1 * self.lambda_cycle    # Identity loss weight .5 lambda for monet and flower in orig paper
         self.lambda_feature = 1.0
+        self.lambda_comp_attrs = 10
 
         #Optimizer
         optimizer = Adam(lr=self.base_lr, beta_1=self.beta_1)
@@ -125,7 +217,12 @@ class CycleGANAttrModel(BaseModel):
         self.g_BA = self.build_generator()
 
         # Build the Perceptual Model
-        self.model_perceptual = self.build_perceptual_model(input_shape=self.img_shape)
+        if self.add_perceptual_loss:        
+            self.model_perceptual = self.build_perceptual_model(input_shape=self.img_shape)
+
+        # Build the Composition Attributes Model
+        if self.target_attr_values:
+            self.model_comp_attrs = self.build_comp_attr_model(input_shape=self.img_shape)
 
         # Input images from both domains
         img_A = Input(shape=self.img_shape)
@@ -144,10 +241,16 @@ class CycleGANAttrModel(BaseModel):
         img_B_id = self.g_AB(img_B)
 
         # Perceptual Feature Loss
-        percept_A = self.model_perceptual([img_A])
-        percept_B = self.model_perceptual([img_B])
-        percept_reconstr_A = self.model_perceptual([reconstr_A])
-        percept_reconstr_B = self.model_perceptual([reconstr_B])
+        if self.add_perceptual_loss:
+            percept_A = self.model_perceptual([img_A])
+            percept_B = self.model_perceptual([img_B])
+            percept_reconstr_A = self.model_perceptual([reconstr_A])
+            percept_reconstr_B = self.model_perceptual([reconstr_B])
+
+        # Compositional Attributes
+        if self.target_attr_values:
+            comp_attrs_A = self.model_comp_attrs(fake_A)
+            comp_attrs_B = self.model_comp_attrs(fake_B)
 
         # For the combined model we will only train the generators
         self.d_A.trainable = False
@@ -157,28 +260,51 @@ class CycleGANAttrModel(BaseModel):
         valid_A = self.d_A(fake_A)
         valid_B = self.d_B(fake_B)
 
+        # Create Outputs Array
+        outputs = [valid_A, valid_B, # d_A(g_BA(img_B), d_B(g_AB(img_A))
+                    reconstr_A, reconstr_B,  # g_BA(g_AB(img_A)), g_AB(g_BA(img_B))
+                    img_A_id, img_B_id] # g_BA(img_A), g_AB(img_B)
+                    
+        loss = ['mse', 'mse',
+                'mae', 'mae',
+                'mae', 'mae']
+
+        loss_weights = [1, 1,
+                        self.lambda_cycle, self.lambda_cycle,
+                        self.lambda_id, self.lambda_id]
+
+        
+        if self.add_perceptual_loss:
+            outputs.extend([percept_A, percept_B,
+                           percept_reconstr_A, percept_reconstr_B,
+                           percept_reconstr_A, percept_reconstr_B])
+            loss.extend(['mse', 'mse',
+                        'mse', 'mse',
+                        'mse', 'mse'])
+            loss_weights.extend([self.lambda_feature, self.lambda_feature,
+                                self.lambda_feature, self.lambda_feature,
+                                self.lambda_feature, self.lambda_feature])
+
+        if self.target_attr_values:
+            len_attrs = len(self.target_attr_values)
+
+            attr_outputs = []
+            for i in range(len_attrs):
+                attr_outputs.extend([comp_attrs_A[i], comp_attrs_B[i]])
+            outputs.extend(attr_outputs)
+            
+            loss.extend(['mse' for i in range(len_attrs * 2)])
+            loss_weights.extend([self.lambda_comp_attrs for i in range(len_attrs * 2)])
+
+        print('model outputs:', len(outputs))
+
         # Combined model trains generators to fool discriminators
         self.combined = Model(inputs=[img_A, img_B],
-                              outputs=[ valid_A, valid_B, # d_A(g_BA(img_B), d_B(g_AB(img_A))
-                                        reconstr_A, reconstr_B,  # g_BA(g_AB(img_A)), g_AB(g_BA(img_B))
-                                        img_A_id, img_B_id, # g_BA(img_A), g_AB(img_B)
-                                        percept_A, percept_B,
-                                        percept_reconstr_A, percept_reconstr_B,
-                                        percept_reconstr_A, percept_reconstr_B ]) 
+                              outputs=outputs) 
 
         if self.weights_path:
             self.model.load_weights(self.weights_path)
 
-        self.combined.compile(loss=['mse', 'mse',
-                                    'mae', 'mae',
-                                    'mae', 'mae',
-                                    'mse', 'mse',
-                                    'mse', 'mse',
-                                    'mse', 'mse'],
-                            loss_weights=[  1, 1,
-                                            self.lambda_cycle, self.lambda_cycle,
-                                            self.lambda_id, self.lambda_id,
-                                            self.lambda_feature, self.lambda_feature,
-                                            self.lambda_feature, self.lambda_feature,
-                                            self.lambda_feature, self.lambda_feature ],
+        self.combined.compile(loss=loss,
+                            loss_weights=loss_weights,
                             optimizer=optimizer)
