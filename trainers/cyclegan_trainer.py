@@ -23,7 +23,8 @@ class CycleGANModelTrainer(BaseTrain):
     def init_callbacks(self):
         self.callbacks.append(
             ModelCheckpoint(
-                filepath = os.path.join(self.checkpoint_dir, '%s-{epoch:02d}-{val_loss:.2f}.hdf5' % self.config['exp_name']),
+                # FIXME: -{d_loss:.2f}
+                filepath = os.path.join(self.checkpoint_dir, '%s-{epoch:02d}.hdf5' % self.config['exp_name']),
                 monitor = self.config['checkpoint_monitor'],
                 mode = self.config['checkpoint_mode'],
                 save_best_only = self.config['checkpoint_save_best_only'],
@@ -140,7 +141,6 @@ class CycleGANModelTrainer(BaseTrain):
                         batch_logs['G Attr{} Loss Fake A'.format(i)] = g_loss[7 + i + loss_index]
                         batch_logs['G Attr{} Loss Fake B'.format(i)] = g_loss[8 + i + loss_index]
 
-                # FIXME: Add save model checkpoint
                 self.callbacks[1].on_batch_end((epoch * steps_per_epoch) + steps_done, batch_logs)
 
                 steps_done += 1
@@ -149,6 +149,9 @@ class CycleGANModelTrainer(BaseTrain):
                 if steps_done % sample_interval == 0:
                     self.sample_images(epoch, steps_done)
             epoch += 1
+
+            # save checkpoint
+            self.callbacks[0].on_epoch_end(epoch)
             
             # shuffle indices
             trainA_datagen.on_epoch_end()
