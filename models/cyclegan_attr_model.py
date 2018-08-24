@@ -21,8 +21,12 @@ class CycleGANAttrModel(BaseModel):
         self.weights_path = config['weights_path']
         self.base_lr = config['base_lr']
         self.beta_1 = config['beta_1']
-        self.loss_weights = config['loss_weights']
-        self.target_attr_values = config['target_attr_values']
+        self.numerical_loss_weights = config['numerical_loss_weights']
+        self.categorical_loss_weights = config['categorical_loss_weights']
+        self.colors = config['colors']
+        self.harmonies = config['harmonies']
+        self.numerical_target_attr_values = config['numerical_target_attr_values']
+        self.categorical_target_attr_values = config['categorical_target_attr_values']
         self.comp_attrs_weights_path = config['comp_attrs_weights_path']
         self.add_perceptual_loss = config['add_perceptual_loss']
         self.build_model()
@@ -156,9 +160,12 @@ class CycleGANAttrModel(BaseModel):
         # create an output for each attribute
         outputs = []
 
-        attrs = [k for k in self.loss_weights]
+        attrs = [k for k in self.numerical_loss_weights]
         for attr in attrs:
             outputs.append(Dense(1, kernel_initializer='glorot_uniform', activation='tanh', name=attr)(merged))
+
+        outputs.append(Dense(len(self.colors), activation='softmax', name='pri_color')(merged))
+        outputs.append(Dense(len(self.harmonies), activation='softmax', name='harmony')(merged))
 
         non_negative_attrs = []
         for attr in non_negative_attrs:
@@ -221,7 +228,7 @@ class CycleGANAttrModel(BaseModel):
             self.model_perceptual = self.build_perceptual_model(input_shape=self.img_shape)
 
         # Build the Composition Attributes Model
-        if self.target_attr_values:
+        if self.numerical_target_attr_values or self.categorical_target_attr_values:
             self.model_comp_attrs = self.build_comp_attr_model(input_shape=self.img_shape)
 
         # Input images from both domains
@@ -248,7 +255,7 @@ class CycleGANAttrModel(BaseModel):
             percept_reconstr_B = self.model_perceptual([reconstr_B])
 
         # Compositional Attributes
-        if self.target_attr_values:
+        if self.numerical_target_attr_values or self.categorical_target_attr_values:
             comp_attrs_A = self.model_comp_attrs(fake_A)
             comp_attrs_B = self.model_comp_attrs(fake_B)
 
@@ -285,16 +292,28 @@ class CycleGANAttrModel(BaseModel):
                                 self.lambda_feature, self.lambda_feature,
                                 self.lambda_feature, self.lambda_feature])
 
-        if self.target_attr_values:
-            len_attrs = len(self.target_attr_values)
+        if self.numerical_target_attr_values:
+            len_numerical_attrs = len(self.numerical_target_attr_values)
 
             attr_outputs = []
-            for i in range(len_attrs):
+            for i in range(len_numerical_attrs):
                 attr_outputs.extend([comp_attrs_A[i], comp_attrs_B[i]])
             outputs.extend(attr_outputs)
             
-            loss.extend(['mse' for i in range(len_attrs * 2)])
-            loss_weights.extend([self.lambda_comp_attrs for i in range(len_attrs * 2)])
+            loss.extend(['mse' for i in range(len_numerical_attrs * 2)])
+            loss_weights.extend([self.lambda_comp_attrs for i in range(len_numerical_attrs * 2)])
+
+        if self.categorical_target_attr_values:
+            len_cat_attrs = len(self.categorical_target_attr_values)
+
+            attr_outputs = []
+            for i in range(len_cat_attrs):
+                attr_outputs.extend([comp_attrs_A[i + len_numerical_attrs], comp_attrs_B[i + len_numerical_attrs]])
+            outputs.extend(attr_outputs)
+            
+            # FIXME
+            loss.extend(['mse' for i in range(len_cat_attrs * 2)])
+            loss_weights.extend([self.lambda_comp_attrs for i in range(len_cat_attrs * 2)])
 
         print('model outputs:', len(outputs))
 

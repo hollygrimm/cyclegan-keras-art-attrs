@@ -7,6 +7,8 @@ from keras.callbacks import ModelCheckpoint
 from base.base_trainer import BaseTrain
 from trainers.tensorboard_batch_monitor import TensorBoardBatchMonitor
 from trainers.data_generator import DataGenerator
+from sklearn.preprocessing import LabelEncoder
+from keras.utils import to_categorical
 
 class CycleGANModelTrainer(BaseTrain):
     def __init__(self, model, trainA_data, trainB_data, testA_data, testB_data, config, tensorboard_log_dir, checkpoint_dir):
@@ -105,9 +107,33 @@ class CycleGANModelTrainer(BaseTrain):
                                    percept_fake_A, percept_fake_B,
                                    percept_A, percept_B])
 
-                if self.config['target_attr_values']:
+                if self.config['numerical_target_attr_values']:
                     attr_outputs = []
-                    for k, value in self.config['target_attr_values'].items():
+                    
+                    # used to normalize attribute value
+                    min_val = 1
+                    max_val = 10
+                    for k, value in self.config['numerical_target_attr_values'].items():
+                        # normalize
+                        norm_value = (2 * ((value - min_val)/(max_val - min_val))) - 1
+                        target_values = np.ones((batch_size, )) * norm_value
+                        attr_outputs.extend([target_values, target_values])
+                    outputs.extend(attr_outputs)
+
+                if self.config['categorical_target_attr_values']:
+                    self.color_encoder = LabelEncoder()
+                    self.color_encoder.fit(self.config['colors'])
+
+                    self.harmony_encoder = LabelEncoder()
+                    self.harmony_encoder.fit(self.config['harmonies'])    
+                    attr_outputs = []
+                    for k, value in self.config['categorical_target_attr_values'].items():
+                        if k == "pri_color":
+                            color = self.color_encoder.transform([value])
+                            value = to_categorical(color, num_classes=len(self.color_encoder.classes_))
+                        elif k == "harmony":
+                            harmony = self.harmony_encoder.transform([value])
+                            value = to_categorical(harmony, num_classes=len(self.harmony_encoder.classes_))
                         target_values = np.ones((batch_size, )) * value
                         attr_outputs.extend([target_values, target_values])
                     outputs.extend(attr_outputs)
@@ -124,22 +150,30 @@ class CycleGANModelTrainer(BaseTrain):
                 batch_logs['G Loss'] = g_loss[0]
                 batch_logs['G Adversarial Loss'] = np.mean(g_loss[1:3])
                 batch_logs['G Cycle-Consistency Loss'] = np.mean(g_loss[3:5]) # if we translate from one domain to another, and then back again
-                batch_logs['G Identity Loss'] = np.mean(g_loss[5:6]) # real samples of the target domain (e.g. img_A) is provided as input to the generator (B->A)
-                
-                loss_index = 0
+                batch_logs['G Identity Loss'] = np.mean(g_loss[5:6]) # real samples of the target domain (e.g. img_A) is provided as input to the generator (B->A)    
+                loss_index = 7
+
                 if self.config['add_perceptual_loss']:
-                    batch_logs['G Feature Loss Fake B'] = g_loss[7]
-                    batch_logs['G Feature Loss Fake A'] = g_loss[8]
-                    batch_logs['G Feature Loss Fake A Recon B'] = g_loss[9]
-                    batch_logs['G Feature Loss Fake B Recon A'] = g_loss[10]
-                    batch_logs['G Feature Loss Real B Recon A'] = g_loss[11]
-                    batch_logs['G Feature Loss Real B Recon B'] = g_loss[12]
+                    batch_logs['G Feature Loss Fake B'] = g_loss[loss_index]
+                    batch_logs['G Feature Loss Fake A'] = g_loss[loss_index + 1]
+                    batch_logs['G Feature Loss Fake A Recon B'] = g_loss[loss_index + 2]
+                    batch_logs['G Feature Loss Fake B Recon A'] = g_loss[loss_index + 3]
+                    batch_logs['G Feature Loss Real B Recon A'] = g_loss[loss_index + 4]
+                    batch_logs['G Feature Loss Real B Recon B'] = g_loss[loss_index + 5]
                     loss_index += 6
 
-                if self.config['target_attr_values']:
-                    for i in range(len(self.config['target_attr_values'])):
-                        batch_logs['G Attr{} Loss Fake A'.format(i)] = g_loss[7 + i + loss_index]
-                        batch_logs['G Attr{} Loss Fake B'.format(i)] = g_loss[8 + i + loss_index]
+                if self.config['numerical_target_attr_values']:
+                    for i, k in enumerate(self.config['numerical_target_attr_values'].keys()):
+                        batch_logs['G {} Loss Fake A'.format(k)] = g_loss[(i * 2) + loss_index]
+                        batch_logs['G {} Loss Fake B'.format(k)] = g_loss[(i * 2) + loss_index + 1]
+                    loss_index += len(self.config['numerical_target_attr_values']) * 2
+
+                if self.config['categorical_target_attr_values']:
+                    for i, k in enumerate(self.config['categorical_target_attr_values'].keys()):
+                        batch_logs['G {} Loss Fake A'.format(k)] = g_loss[(i * 2) + loss_index]
+                        batch_logs['G {} Loss Fake B'.format(k)] = g_loss[(i * 2) + loss_index + 1]   
+
+                print(batch_logs)                     
 
                 self.callbacks[1].on_batch_end((epoch * steps_per_epoch) + steps_done, batch_logs)
 

@@ -17,8 +17,8 @@
 
     "add_perceptual_loss": false,
 
-    "comp_attrs_weights_path": "data/20_256_1e-04_2-09-0.50.hdf5",
-    "loss_weights": {
+    "comp_attrs_weights_path": "data/20_256_1e-04_2-61-2.84.hdf5",
+    "numerical_loss_weights": {
         "variety_texture": 0.5,
         "variety_shape": 0.5,
         "variety_size": 0.5,
@@ -26,14 +26,45 @@
         "contrast": 0.5,
         "repetition": 0.5
     }, 
-    "target_attr_values": {
+    "categorical_loss_weights": {
+        "pri_color": 1.0,
+        "harmony": 1.0 
+    },
+    "colors": [
+        "black",
+        "red",
+        "orange",
+        "yellow",
+        "green-yellow",
+        "green",
+        "green-cyan",
+        "cyan",
+        "blue-cyan",
+        "blue",
+        "blue-magenta",
+        "magenta",
+        "red-magenta"
+    ],    
+    "harmonies": [
+        "split complementary",
+        "complementary",
+        "monochromatic",
+        "analogous",
+        "tetradic",
+        "triadic"
+    ],       
+    "numerical_target_attr_values": {
         "variety_texture": 1,
         "variety_shape": 1,
         "variety_size": 1,
         "variety_color": 1,
         "contrast": 10,
         "repetition": 1
-    },     
+    },  
+    "categorical_target_attr_values": {
+        "pri_color": "orange",
+        "harmony": "analogous"
+    },         
 
     "checkpoint_monitor": "d_loss",
     "checkpoint_mode": "min",
