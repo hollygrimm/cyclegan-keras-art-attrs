@@ -311,8 +311,7 @@ class CycleGANAttrModel(BaseModel):
                 attr_outputs.extend([comp_attrs_A[i + len_numerical_attrs], comp_attrs_B[i + len_numerical_attrs]])
             outputs.extend(attr_outputs)
             
-            # FIXME
-            loss.extend(['mse' for i in range(len_cat_attrs * 2)])
+            loss.extend(['categorical_crossentropy' for i in range(len_cat_attrs * 2)])
             loss_weights.extend([self.lambda_comp_attrs for i in range(len_cat_attrs * 2)])
 
         print('model outputs:', len(outputs))
