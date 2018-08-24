@@ -171,9 +171,7 @@ class CycleGANModelTrainer(BaseTrain):
                 if self.config['categorical_target_attr_values']:
                     for i, k in enumerate(self.config['categorical_target_attr_values'].keys()):
                         batch_logs['G {} Loss Fake A'.format(k)] = g_loss[(i * 2) + loss_index]
-                        batch_logs['G {} Loss Fake B'.format(k)] = g_loss[(i * 2) + loss_index + 1]   
-
-                print(batch_logs)                     
+                        batch_logs['G {} Loss Fake B'.format(k)] = g_loss[(i * 2) + loss_index + 1]                   
 
                 self.callbacks[1].on_batch_end((epoch * steps_per_epoch) + steps_done, batch_logs)
 
