@@ -23,6 +23,12 @@ $ bash download_dataset.sh apple2orange
 python main.py -c input_params.json
 ```
 
+## Run Tests
+```
+cd tests
+python cyclegan_keras_art_attrs_tests.py
+```
+
 
 ## Acknowledgements
 
@@ -30,6 +36,7 @@ python main.py -c input_params.json
 * Erik Linder-Norén https://github.com/eriklindernoren/Keras-GAN
 * HagopB https://github.com/HagopB/cyclegan
 * Ulyanov et al Instance Normalization: The Missing Ingredient for Fast Stylization https://arxiv.org/pdf/1607.08022.pdf
+* Ahmed Hamada Mohamed Kamel El-Hinidy https://github.com/Ahmkel/Keras-Project-Template
 
 
 
