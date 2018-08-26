@@ -186,7 +186,6 @@ class CycleGANAttrModel(BaseModel):
         
         return comp_attr_model
               
-
     def mse_loss(self, y_true, y_pred):
         loss = K.mean(K.square(y_true - y_pred))
         return loss
@@ -201,10 +200,9 @@ class CycleGANAttrModel(BaseModel):
         self.df = 64
 
         # Loss weights
-        self.lambda_cycle = 10.0                    # Cycle-consistency loss weight, same as in orig paper
-        self.lambda_id = 0.1 * self.lambda_cycle    # Identity loss weight .5 lambda for monet and flower in orig paper
+        self.lambda_cycle = 1.0                    # Cycle-consistency loss weight, 10.0 in orig paper
+        self.lambda_id = 0.1 * self.lambda_cycle   # Identity loss weight .5 lambda for monet and flower in orig paper
         self.lambda_feature = 1.0
-        self.lambda_comp_attrs = 10
 
         #Optimizer
         optimizer = Adam(lr=self.base_lr, beta_1=self.beta_1)
@@ -301,7 +299,7 @@ class CycleGANAttrModel(BaseModel):
             outputs.extend(attr_outputs)
             
             loss.extend(['mse' for i in range(len_numerical_attrs * 2)])
-            loss_weights.extend([self.lambda_comp_attrs for i in range(len_numerical_attrs * 2)])
+            loss_weights.extend([y for x in self.numerical_loss_weights.values() for y in [x, x]])
 
         if self.categorical_target_attr_values:
             len_cat_attrs = len(self.categorical_target_attr_values)
@@ -312,9 +310,10 @@ class CycleGANAttrModel(BaseModel):
             outputs.extend(attr_outputs)
             
             loss.extend(['categorical_crossentropy' for i in range(len_cat_attrs * 2)])
-            loss_weights.extend([self.lambda_comp_attrs for i in range(len_cat_attrs * 2)])
+            loss_weights.extend([y for x in self.categorical_loss_weights.values() for y in [x, x]])
 
         print('model outputs:', len(outputs))
+        print('loss weights:', loss_weights)
 
         # Combined model trains generators to fool discriminators
         self.combined = Model(inputs=[img_A, img_B],

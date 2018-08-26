@@ -1,5 +1,5 @@
 {
-    "exp_name": "200_256_1e-04_1_comp_attrs",
+    "exp_name": "200_256_1e-04_1_equal_attrs_5_orange_analogous",
 
     "dataset_name": "apple2orange",
 
@@ -17,18 +17,18 @@
 
     "add_perceptual_loss": false,
 
-    "comp_attrs_weights_path": "data/20_256_1e-04_2-61-2.84.hdf5",
+    "comp_attrs_weights_path": "data/art_composition_cnn_weights.hdf5",
     "numerical_loss_weights": {
-        "variety_texture": 0.5,
-        "variety_shape": 0.5,
-        "variety_size": 0.5,
-        "variety_color": 0.5,
-        "contrast": 0.5,
-        "repetition": 0.5
+        "variety_texture": 1.0,
+        "variety_shape": 1.0,
+        "variety_size": 1.0,
+        "variety_color": 1.0,
+        "contrast": 1.0,
+        "repetition": 1.0
     }, 
     "categorical_loss_weights": {
-        "pri_color": 1.0,
-        "harmony": 1.0 
+        "pri_color": 0.15,
+        "harmony": 0.15 
     },
     "colors": [
         "black",
@@ -54,12 +54,12 @@
         "triadic"
     ],       
     "numerical_target_attr_values": {
-        "variety_texture": 1,
-        "variety_shape": 1,
-        "variety_size": 1,
-        "variety_color": 1,
-        "contrast": 10,
-        "repetition": 1
+        "variety_texture": 5,
+        "variety_shape": 5,
+        "variety_size": 5,
+        "variety_color": 5,
+        "contrast": 5,
+        "repetition": 5
     },  
     "categorical_target_attr_values": {
         "pri_color": "orange",
