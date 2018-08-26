@@ -1,0 +1,75 @@
+{
+    "exp_name": "200_256_1e-04_1_harmony_monochromatic",
+
+    "dataset_name": "apple2orange",
+
+    "img_size": 256,
+
+    "base_lr": 1e-04, 
+    "beta_1": 0.5,
+
+    "weights_path": null,
+    "batch_size": 1, 
+    "initial_epoch": 0,     
+    "nb_epoch": 200,
+    "validation_split": 0.25,
+    "verbose_training": 2,
+
+    "add_perceptual_loss": false,
+
+    "comp_attrs_weights_path": "data/art_composition_cnn_weights.hdf5",
+    "numerical_loss_weights": {
+        "variety_texture": 0,
+        "variety_shape": 0,
+        "variety_size": 0,
+        "variety_color": 0,
+        "contrast": 0,
+        "repetition": 0
+    }, 
+    "categorical_loss_weights": {
+        "pri_color": 0,
+        "harmony": 1.0 
+    },
+    "colors": [
+        "black",
+        "red",
+        "orange",
+        "yellow",
+        "green-yellow",
+        "green",
+        "green-cyan",
+        "cyan",
+        "blue-cyan",
+        "blue",
+        "blue-magenta",
+        "magenta",
+        "red-magenta"
+    ],    
+    "harmonies": [
+        "split complementary",
+        "complementary",
+        "monochromatic",
+        "analogous",
+        "tetradic",
+        "triadic"
+    ],       
+    "numerical_target_attr_values": {
+        "variety_texture": 5,
+        "variety_shape": 5,
+        "variety_size": 5,
+        "variety_color": 5,
+        "contrast": 5,
+        "repetition": 5
+    },  
+    "categorical_target_attr_values": {
+        "pri_color": "orange",
+        "harmony": "monochromatic"
+    },         
+
+    "checkpoint_monitor": "d_loss",
+    "checkpoint_mode": "min",
+    "checkpoint_save_best_only": false,
+    "checkpoint_save_weights_only": false,
+    "checkpoint_verbose": 1,
+    "tensorboard_write_graph": true
+}
