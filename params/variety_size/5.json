@@ -1,5 +1,5 @@
 {
-    "exp_name": "200_256_1e-04_1_variety_size_5",
+    "exp_name": "200_256_1e-04_1_variety_size_5_10.0",
 
     "dataset_name": "apple2orange",
 
@@ -21,7 +21,7 @@
     "numerical_loss_weights": {
         "variety_texture": 0,
         "variety_shape": 0,
-        "variety_size": 1.0,
+        "variety_size": 10.0,
         "variety_color": 0,
         "contrast": 0,
         "repetition": 0
