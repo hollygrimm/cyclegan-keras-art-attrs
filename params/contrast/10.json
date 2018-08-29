@@ -1,5 +1,5 @@
 {
-    "exp_name": "200_256_1e-04_1_contrast_10",
+    "exp_name": "200_256_1e-04_1_contrast_10_10.0",
 
     "dataset_name": "apple2orange",
 
@@ -23,7 +23,7 @@
         "variety_shape": 0,
         "variety_size": 0,
         "variety_color": 0,
-        "contrast": 1.0,
+        "contrast": 10.0,
         "repetition": 0
     }, 
     "categorical_loss_weights": {

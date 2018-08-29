@@ -1,5 +1,5 @@
 {
-    "exp_name": "200_256_1e-04_1_pri_color_orange",
+    "exp_name": "200_256_1e-04_1_pri_color_orange_10.0",
 
     "dataset_name": "apple2orange",
 
@@ -27,7 +27,7 @@
         "repetition": 0
     }, 
     "categorical_loss_weights": {
-        "pri_color": 1.0,
+        "pri_color": 10.0,
         "harmony": 0 
     },
     "colors": [
