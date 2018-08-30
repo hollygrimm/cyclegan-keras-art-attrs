@@ -16,8 +16,9 @@ class CycleGANAttrModel(BaseModel):
     def __init__(self, config):
         super(CycleGANAttrModel, self).__init__(config)
         self.channels = 3
-        self.img_size = config['img_size']
-        self.img_shape = (self.img_size, self.img_size, self.channels)
+        self.img_size_x = config['img_size_x']
+        self.img_size_y = config['img_size_y']
+        self.img_shape = (self.img_size_x, self.img_size_y, self.channels)
         self.weights_path = config['weights_path']
         self.base_lr = config['base_lr']
         self.beta_1 = config['beta_1']
@@ -192,8 +193,10 @@ class CycleGANAttrModel(BaseModel):
 
     def build_model(self):
         # Calculate output shape of the Discriminator (PatchGAN)
-        patch = int(self.img_size / 2**4)
-        self.disc_patch = (patch, patch, 1)
+        # TODO: Verify rectangular kernels used here:
+        patch_x = int(self.img_size_x / 2**4)
+        patch_y = int(self.img_size_y / 2**4)
+        self.disc_patch = (patch_x, patch_y, 1)
 
         # Number of filters in first conv layer of generator and discriminator
         self.gf = 32

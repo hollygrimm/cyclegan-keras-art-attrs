@@ -60,8 +60,8 @@ class CycleGANModelTrainer(BaseTrain):
         valid = np.ones((batch_size,) + self.model.disc_patch)
         fake = np.zeros((batch_size,) + self.model.disc_patch)
 
-        trainA_datagen = DataGenerator(img_filenames=self.trainA_data, batch_size=batch_size, target_size=(self.config['img_size'], self.config['img_size']))
-        trainB_datagen = DataGenerator(img_filenames=self.trainB_data, batch_size=batch_size, target_size=(self.config['img_size'], self.config['img_size']))
+        trainA_datagen = DataGenerator(img_filenames=self.trainA_data, batch_size=batch_size, target_size=(self.config['img_size_x'], self.config['img_size_y']))
+        trainB_datagen = DataGenerator(img_filenames=self.trainB_data, batch_size=batch_size, target_size=(self.config['img_size_x'], self.config['img_size_y']))
 
         steps_per_epoch = len(trainA_datagen)
         print(steps_per_epoch)
@@ -194,8 +194,8 @@ class CycleGANModelTrainer(BaseTrain):
         os.makedirs('images/%s' % self.config['dataset_name'], exist_ok=True)
         r, c = 2, 3
 
-        testA_datagen = DataGenerator(img_filenames=self.testA_data, batch_size=1, target_size=(self.config['img_size'], self.config['img_size']))
-        testB_datagen = DataGenerator(img_filenames=self.testB_data, batch_size=1, target_size=(self.config['img_size'], self.config['img_size']))
+        testA_datagen = DataGenerator(img_filenames=self.testA_data, batch_size=1, target_size=(self.config['img_size_x'], self.config['img_size_y']))
+        testB_datagen = DataGenerator(img_filenames=self.testB_data, batch_size=1, target_size=(self.config['img_size_x'], self.config['img_size_y']))
 
         testA_generator = iter(testA_datagen)
         testB_generator = iter(testB_datagen)
