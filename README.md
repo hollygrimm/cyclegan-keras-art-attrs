@@ -1,25 +1,50 @@
 # CycleGAN on Art Composition Attributes
 
 ## Requirements
-Keras version 2.1.2
+* Keras version 2.1.2
+* keras-contrib from Aug 9, 2018 hash: 3427000d9fa21561c31c01479fa74fba1a36ab08
+* pillow
 
-INSTALL keras-contrib for Instance Normalization:
-https://github.com/keras-team/keras-contrib/blob/master/keras_contrib/layers/normalization.py
 
+## AWS Install
+* Select Deep Learning AMI (Ubuntu) Version 13.0
+* Instance Type `GPU Compute` such as p2.xlarge
+* 125GB sda1
+
+Connect to instance, copy contents of aws-setup.sh to file in /home/ubuntu and run:
+```
+vi aws-setup.sh
+chmod +x aws-setup.sh
+./aws-setup.sh
+```
+
+## Manual Install
+### keras-contrib install
 ```
 source activate tensorflow
 git clone https://www.github.com/keras-team/keras-contrib.git
 cd keras-contrib
+git reset --hard 3427000d9fa21561c31c01479fa74fba1a36ab08
 python setup.py install
 ```
 
+### Download Pretrained Art Composition Attributes Weights
 Pre-trained ResNet50 Model with Art Composition Attributes: https://github.com/hollygrimm/art-composition-cnn
+```
+wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1A1FvTA-n7EZrtLx7TD9q3KgF5khpAjVW' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1A1FvTA-n7EZrtLx7TD9q3KgF5khpAjVW" -O art_composition_cnn_weights.hdf5 && rm -rf /tmp/cookies.txt
 
-## Download Dataset
-$ bash download_dataset.sh apple2orange
+sha256sum d922aa82e6e67177915895e34f02e03e89a902d7a15914edcee0c3056f285d24
+```
+
+### Download Dataset
+```
+bash download_dataset.sh apple2orange
+```
 
 ## Run Training
 ```
+source activate tensorflow_p36
+cd cyclegan-keras-art-attrs/
 python main.py -c input_params.json
 ```
 
