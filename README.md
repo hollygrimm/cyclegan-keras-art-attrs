@@ -1,5 +1,7 @@
 # CycleGAN on Art Composition Attributes
 
+Please read the accompanying blog post: [https://hollygrimm.com/acan](https://hollygrimm.com/acan)
+
 ## Requirements
 * Keras version 2.1.2
 * keras-contrib from Aug 9, 2018 hash: 3427000d9fa21561c31c01479fa74fba1a36ab08
