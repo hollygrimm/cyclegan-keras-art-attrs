@@ -2,6 +2,27 @@
 
 Please read the accompanying blog post: [https://hollygrimm.com/acan_final](https://hollygrimm.com/acan_final)
 
+## Results when training on Apple2Orange
+
+1 | 2
+------------ | -------------
+python main.py -c params/harmony/analogous.json | python main.py -c params/harmony/complementary.json
+![Color Harmony Analogous](assets/200_256_1e-04_1_harmony_analogous_10.0.png) | ![Color Harmony Complementary](assets/200_256_1e-04_1_harmony_complementary_10.0.png)
+python main.py -c params/variety_color/1.json | python main.py -c params/variety_color/10.json
+![Variety of Color 1](assets/cyclegan_968_.7_variety_color_1_10.0.png) | ![Variety of Color 10](assets/cyclegan_968_variety_color_10_10.0.png)
+python main.py -c params/variety_texture/1.json | python main.py -c params/variety_texture/10.json
+![Variety of Texture 1](assets/200_256_1e-04_1_variety_texture_1_10.0.png) | ![Variety of Texture 10](assets/200_256_1e-04_1_variety_texture_10_10.0.png)
+python main.py -c params/variety_shape/1.json | python main.py -c params/variety_shape/10.json
+![Variety of Shape 1](assets/cyclegan_77_.7_variety_shape_1_1.0.png) | ![Variety of Shape 10](assets/cyclegan_419_.7_variety_shape_10_10.0.png)
+python main.py -c params/variety_size/1.json | python main.py -c params/variety_size/10.json
+![Variety of Size 1](assets/cyclegan_968_.7_variety_size_1_10.0.png) | ![Variety of Size 10](assets/cyclegan_968_.7_variety_size_10_10.0.png)
+python main.py -c params/contrast/1.json | python main.py -c params/contrast/10.json
+![Contrast 1](assets/cyclegan_419_.7_contrast_1_10.0.png) | ![Contrast 10](assets/cyclegan_968_.7_contrast_10_10.0.png)
+python main.py -c params/repetition/1.json | python main.py -c params/repetition/10.json
+![Repetition 1](assets/200_256_1e-04_1_repetition_1_10.png) | ![Repetition 10](assets/200_256_1e-04_1_repetition_10_10.0.png)
+python main.py -c params/pri_color/blue-cyan.json | python main.py -c params/pri_color/green-yellow.json
+![Primary Color Blue-Cyan](assets/200_256_1e-04_1_pri_color_blue-cyan_10.0.png) | ![Primary Color Green-Yellow](assets/200_256_1e-04_1_pri_color_green-yellow_10.0.png)
+
 ## Requirements
 * Keras version 2.1.2
 * keras-contrib from Aug 9, 2018 hash: 3427000d9fa21561c31c01479fa74fba1a36ab08
