@@ -24,8 +24,8 @@ python main.py -c params/pri_color/blue-cyan.json | python main.py -c params/pri
 ![Primary Color Blue-Cyan](assets/200_256_1e-04_1_pri_color_blue-cyan_10.0.png) | ![Primary Color Green-Yellow](assets/200_256_1e-04_1_pri_color_green-yellow_10.0.png)
 
 ## Requirements
-* Keras version 2.1.2
-* keras-contrib from Aug 9, 2018 hash: 3427000d9fa21561c31c01479fa74fba1a36ab08
+* Keras
+* keras-contrib
 * pillow
 * Weights from https://github.com/hollygrimm/art-composition-cnn
 
@@ -47,7 +47,6 @@ chmod +x aws-setup.sh
 source activate tensorflow
 git clone https://www.github.com/keras-team/keras-contrib.git
 cd keras-contrib
-git reset --hard 3427000d9fa21561c31c01479fa74fba1a36ab08
 python setup.py install
 ```
 
