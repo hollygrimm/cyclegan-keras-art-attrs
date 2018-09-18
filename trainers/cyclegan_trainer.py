@@ -9,6 +9,7 @@ from trainers.tensorboard_batch_monitor import TensorBoardBatchMonitor
 from trainers.data_generator import DataGenerator
 from sklearn.preprocessing import LabelEncoder
 from keras.utils import to_categorical
+import imageio
 
 class CycleGANModelTrainer(BaseTrain):
     def __init__(self, model, trainA_data, trainB_data, testA_data, testB_data, config, tensorboard_log_dir, checkpoint_dir):
@@ -228,3 +229,10 @@ class CycleGANModelTrainer(BaseTrain):
                 cnt += 1
         fig.savefig("images/%s/%d_%d.png" % (self.config['dataset_name'], epoch, batch_i))
         plt.close()
+
+        imageio.imwrite("images/%s/%d_%d_a_transl.png" % (self.config['dataset_name'], epoch, batch_i), ((fake_B[0]+1)*127.5).astype(np.uint8))
+        imageio.imwrite("images/%s/%d_%d_b_transl.png" % (self.config['dataset_name'], epoch, batch_i), ((fake_A[0]+1)*127.5).astype(np.uint8))
+        imageio.imwrite("images/%s/%d_%d_a_recon.png" % (self.config['dataset_name'], epoch, batch_i), ((reconstr_A[0]+1)*127.5).astype(np.uint8))
+        imageio.imwrite("images/%s/%d_%d_b_recon.png" % (self.config['dataset_name'], epoch, batch_i), ((reconstr_B[0]+1)*127.5).astype(np.uint8))
+        imageio.imwrite("images/%s/%d_%d_a_orig.png" % (self.config['dataset_name'], epoch, batch_i), ((imgs_A[0]+1)*127.5).astype(np.uint8))
+        imageio.imwrite("images/%s/%d_%d_a_orig.png" % (self.config['dataset_name'], epoch, batch_i), ((imgs_B[0]+1)*127.5).astype(np.uint8))
