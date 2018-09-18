@@ -9,6 +9,7 @@ cd keras-contrib
 source activate tensorflow_p36
 pip install keras
 pip install pillow
+pip install imageio
 python setup.py install
 source deactivate
 cd ~/cyclegan-keras-art-attrs

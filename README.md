@@ -27,10 +27,11 @@ python main.py -c params/pri_color/blue-cyan.json | python main.py -c params/pri
 * Keras
 * keras-contrib
 * pillow
+* imageio
 * Weights from https://github.com/hollygrimm/art-composition-cnn
 
 ## AWS Install
-* Select Deep Learning AMI (Ubuntu) Version 13.0
+* Select Deep Learning AMI (Ubuntu) Version 14.0
 * Instance Type `GPU Compute` such as p2.xlarge
 * 125GB sda1
 
