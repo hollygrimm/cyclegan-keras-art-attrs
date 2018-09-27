@@ -234,5 +234,4 @@ class CycleGANModelTrainer(BaseTrain):
         imageio.imwrite("images/%s/%d_%d_b_transl.png" % (self.config['dataset_name'], epoch, batch_i), ((fake_A[0]+1)*127.5).astype(np.uint8))
         imageio.imwrite("images/%s/%d_%d_a_recon.png" % (self.config['dataset_name'], epoch, batch_i), ((reconstr_A[0]+1)*127.5).astype(np.uint8))
         imageio.imwrite("images/%s/%d_%d_b_recon.png" % (self.config['dataset_name'], epoch, batch_i), ((reconstr_B[0]+1)*127.5).astype(np.uint8))
-        imageio.imwrite("images/%s/%d_%d_a_orig.png" % (self.config['dataset_name'], epoch, batch_i), ((imgs_A[0]+1)*127.5).astype(np.uint8))
-        imageio.imwrite("images/%s/%d_%d_a_orig.png" % (self.config['dataset_name'], epoch, batch_i), ((imgs_B[0]+1)*127.5).astype(np.uint8))
+
