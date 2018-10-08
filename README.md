@@ -45,7 +45,7 @@ chmod +x aws-setup.sh
 ## Manual Install
 ### keras-contrib install
 ```
-source activate tensorflow
+source activate tensorflow_p36
 git clone https://www.github.com/keras-team/keras-contrib.git
 cd keras-contrib
 python setup.py install
