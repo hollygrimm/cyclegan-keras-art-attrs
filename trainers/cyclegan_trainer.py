@@ -52,7 +52,8 @@ class CycleGANModelTrainer(BaseTrain):
             experiment.log_multiple_params(self.config)
             self.callbacks.append(experiment.get_keras_callback())      
 
-    def train(self, sample_interval=200):
+    # TODO: sample_interval from input_params.json
+    def train(self, sample_interval=20):
         start_time = datetime.datetime.now()
         epoch = 0
         epochs = self.config['nb_epoch']
@@ -235,3 +236,4 @@ class CycleGANModelTrainer(BaseTrain):
         imageio.imwrite("images/%s/%d_%d_a_recon.png" % (self.config['dataset_name'], epoch, batch_i), ((reconstr_A[0]+1)*127.5).astype(np.uint8))
         imageio.imwrite("images/%s/%d_%d_b_recon.png" % (self.config['dataset_name'], epoch, batch_i), ((reconstr_B[0]+1)*127.5).astype(np.uint8))
 
+        
