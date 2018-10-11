@@ -28,6 +28,9 @@ python main.py -c params/pri_color/blue-cyan.json | python main.py -c params/pri
 * keras-contrib
 * pillow
 * imageio
+* pandas
+* matplotlib
+* sklearn
 * Weights from https://github.com/hollygrimm/art-composition-cnn
 
 ## AWS Install
@@ -65,6 +68,15 @@ Or train your own weights using this repository: https://github.com/hollygrimm/a
 ```
 bash download_dataset.sh apple2orange
 ```
+
+With a batch size of 1, here are the image sizes that I was able to train on various GPU sizes:
+
+| GPU        | Img Size    | Trains?  |
+|:------------- |:-------------|:-----|
+|2GB|720x880|No, OOM|
+|2GB|320x384|No, OOM|
+|2GB|256x256|Yes|
+
 
 ## Run Training
 ```
