@@ -76,6 +76,9 @@ With a batch size of 1, here are the image sizes that I was able to train on var
 |2GB|720x880|No, OOM|
 |2GB|320x384|No, OOM|
 |2GB|256x256|Yes|
+|11GB|720x880|Yes|
+|11GB|640x480|Yes|
+|11GB|320x384|Yes|
 
 
 ## Run Training
