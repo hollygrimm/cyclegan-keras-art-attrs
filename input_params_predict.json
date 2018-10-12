@@ -6,10 +6,13 @@
     "img_size_x": 256,
     "img_size_y": 256,
 
+    "predict_img_size_x": 384,
+    "predict_img_size_y": 384,
+
     "base_lr": 1e-04, 
     "beta_1": 0.5,
 
-    "weights_path": null,
+    "weights_path": "experiments/2018-10-12/200_256_256_1e-04_1_equal_attrs_5_orange_analogous/checkpoints/200_256_256_1e-04_1_equal_attrs_5_orange_analogous-02.hdf5",
     "batch_size": 1, 
     "initial_epoch": 0,     
     "nb_epoch": 200,

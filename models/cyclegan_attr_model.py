@@ -18,7 +18,10 @@ class CycleGANAttrModel(BaseModel):
         self.channels = 3
         self.img_size_x = config['img_size_x']
         self.img_size_y = config['img_size_y']
+        self.predict_img_size_x = config['predict_img_size_x']
+        self.predict_img_size_y = config['predict_img_size_y']
         self.img_shape = (self.img_size_x, self.img_size_y, self.channels)
+        self.predict_img_shape = (self.predict_img_size_x, self.predict_img_size_y, self.channels)
         self.weights_path = config['weights_path']
         self.base_lr = config['base_lr']
         self.beta_1 = config['beta_1']
@@ -30,9 +33,9 @@ class CycleGANAttrModel(BaseModel):
         self.categorical_target_attr_values = config['categorical_target_attr_values']
         self.comp_attrs_weights_path = config['comp_attrs_weights_path']
         self.add_perceptual_loss = config['add_perceptual_loss']
-        self.build_model()
+        
 
-    def build_generator(self):
+    def build_generator(self, shape):
 
         def conv2d(layer_input, filters, f_size=4):
             d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
@@ -49,7 +52,7 @@ class CycleGANAttrModel(BaseModel):
             u = Concatenate()([u, skip_input])
             return u
 
-        d0 = Input(shape=self.img_shape)
+        d0 = Input(shape=shape)
 
         d1 = conv2d(d0, self.gf)
         d2 = conv2d(d1, self.gf*2)
@@ -221,8 +224,8 @@ class CycleGANAttrModel(BaseModel):
             metrics=['accuracy'])
 
         # Build the generators
-        self.g_AB = self.build_generator()
-        self.g_BA = self.build_generator()
+        self.g_AB = self.build_generator(shape=self.img_shape)
+        self.g_BA = self.build_generator(shape=self.img_shape)
 
         # Build the Perceptual Model
         if self.add_perceptual_loss:        
@@ -328,3 +331,55 @@ class CycleGANAttrModel(BaseModel):
         self.combined.compile(loss=loss,
                             loss_weights=loss_weights,
                             optimizer=optimizer)
+
+    def build_predict_model(self):
+        # Number of filters in first conv layer of generator and discriminator
+        self.gf = 32
+
+        # Build the generators
+        self.g_AB = self.build_generator(shape=self.img_shape)
+        self.g_BA = self.build_generator(shape=self.img_shape)
+
+        # Input images from both domains
+        orig_img_A = Input(shape=self.img_shape)
+        orig_img_B = Input(shape=self.img_shape)
+
+        # Translate images to the other domain
+        fake_B = self.g_AB(orig_img_A)
+        fake_A = self.g_BA(orig_img_B)
+
+        # Translate images back to original domain
+        # reconstr_A = self.g_BA(fake_B)
+        # reconstr_B = self.g_AB(fake_A)
+
+        # Create Outputs Array
+        outputs = [fake_B, fake_A]  # g_BA(g_AB(img_A)), g_AB(g_BA(img_B))
+
+        print('model outputs:', len(outputs))
+
+        # Combined model trains generators to fool discriminators
+        self.combined = Model(inputs=[orig_img_A, orig_img_B],
+                              outputs=outputs) 
+
+        self.combined.load_weights(self.weights_path, by_name=True, skip_mismatch=True)
+
+        # predict model
+        predict_img_A = Input(shape=self.predict_img_shape)
+        predict_img_B = Input(shape=self.predict_img_shape)
+
+        self.predict_g_AB = self.build_generator(shape=self.predict_img_shape)
+        self.predict_g_BA = self.build_generator(shape=self.predict_img_shape)
+
+        predict_fake_B = self.predict_g_AB(predict_img_A)
+        predict_fake_A = self.predict_g_BA(predict_img_B)
+
+        predict_outputs = [predict_fake_B, predict_fake_A] 
+
+        self.predict = Model(inputs=[predict_img_A, predict_img_B],
+                              outputs=predict_outputs) 
+
+
+        for new_layer, layer in zip(self.predict.layers[1:], self.combined.layers[1:]):
+            new_layer.set_weights(layer.get_weights())
+
+

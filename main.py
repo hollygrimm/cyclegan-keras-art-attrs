@@ -11,6 +11,7 @@ def main():
     # process the json configuration file
     try:
         args = get_args()
+        # TODO: Error if args.config doesn't exist
         config, log_dir, checkpoint_dir = process_config(args.config)
     except:
         print('missing or invalid arguments')
@@ -24,6 +25,7 @@ def main():
 
     print('Create the model')
     model = CycleGANAttrModel(config)
+    model.build_model()
     print('model ready loading data now')
 
     print('Create the trainer')
