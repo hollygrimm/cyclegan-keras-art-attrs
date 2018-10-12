@@ -24,8 +24,14 @@ python main.py -c params/pri_color/blue-cyan.json | python main.py -c params/pri
 ![Primary Color Blue-Cyan](assets/200_256_1e-04_1_pri_color_blue-cyan_10.0.png) | ![Primary Color Green-Yellow](assets/200_256_1e-04_1_pri_color_green-yellow_10.0.png)
 
 ## Requirements
-* Keras
+
+Error message 'ValueError: axes don't match array' during load_weights unless older version of Keras and keras-contrib installed. See https://stackoverflow.com/questions/51944836/keras-load-model-valueerror-axes-dont-match-array
+
+* Keras 2.1.5
 * keras-contrib
+    * cd keras-contrib
+    * git reset --hard 3427000d9fa21561c31c01479fa74fba1a36ab08
+    * python setup.py install
 * pillow
 * imageio
 * pandas
@@ -51,6 +57,7 @@ chmod +x aws-setup.sh
 source activate tensorflow_p36
 git clone https://www.github.com/keras-team/keras-contrib.git
 cd keras-contrib
+git reset --hard 3427000d9fa21561c31c01479fa74fba1a36ab08
 python setup.py install
 ```
 
@@ -73,12 +80,17 @@ With a batch size of 1, here are the image sizes that I was able to train on var
 
 | GPU        | Img Size    | Trains?  |
 |:------------- |:-------------|:-----|
-|2GB|720x880|No, OOM|
-|2GB|320x384|No, OOM|
-|2GB|256x256|Yes|
-|11GB|720x880|Yes|
-|11GB|640x480|Yes|
-|11GB|320x384|Yes|
+|2 GiB|320x384|No, OOM|
+|2 GiB|256x256|Yes|
+|12 GiB|1024x1024|No, OOM|
+|12 GiB|768x768|Yes|
+|12 GiB|720x880|Yes|
+|12 GiB|640x480|Yes|
+|12 GiB|320x384|Yes|
+|16 GiB|1280x1280|No, OOM|
+|16 GiB|1024x1024|Yes|
+
+TODO: Chart for predict image sizes
 
 
 ## Run Training
@@ -86,6 +98,13 @@ With a batch size of 1, here are the image sizes that I was able to train on var
 source activate tensorflow_p36
 cd cyclegan-keras-art-attrs/
 python main.py -c input_params.json
+```
+
+## Run Predict
+```
+source activate tensorflow_p36
+cd cyclegan-keras-art-attrs/
+python predict.py -c input_params_predict.json
 ```
 
 ## Run Tests

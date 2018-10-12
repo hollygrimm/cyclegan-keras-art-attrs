@@ -6,8 +6,9 @@ bash download_dataset.sh apple2orange
 cd ~
 git clone https://www.github.com/keras-team/keras-contrib.git
 cd keras-contrib
+git reset --hard 3427000d9fa21561c31c01479fa74fba1a36ab08
 source activate tensorflow_p36
-pip install keras
+pip install keras==2.1.5
 pip install pillow
 pip install imageio
 python setup.py install
