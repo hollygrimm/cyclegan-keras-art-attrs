@@ -90,7 +90,12 @@ With a batch size of 1, here are the image sizes that I was able to train on var
 |16 GiB|1280x1280|No, OOM|
 |16 GiB|1024x1024|Yes|
 
-TODO: Chart for predict image sizes
+
+| GPU        | Predict Img Size    | Predict Both A & B? (with Reconstruction) | Predict Only One? |
+|:------------- |:-------------|:-----|
+|2 GiB|1536x1536|No, OOM|No, OOM|
+|2 GiB|1280x1280|No, OOM|Yes|
+|2 GiB|1024x1024|Yes|Yes|
 
 
 ## Run Training
@@ -101,6 +106,9 @@ python main.py -c input_params.json
 ```
 
 ## Run Predict
+
+after training, update weights_path in input_params_predict.json
+
 ```
 source activate tensorflow_p36
 cd cyclegan-keras-art-attrs/
