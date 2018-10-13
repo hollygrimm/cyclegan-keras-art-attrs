@@ -7,6 +7,7 @@ def get_args():
     argparser = argparse.ArgumentParser(description=__doc__)
     argparser.add_argument(
         '-c', '--config',
+        required=True,
         dest='config',
         metavar='C',
         default='None',
@@ -30,12 +31,9 @@ def get_config_from_json(json_file):
 
 def process_config(json_file):
     config_dict = get_config_from_json(json_file)
-    # TODO: add time to path
-    log_dir = os.path.join('experiments', time.strftime("%Y-%m-%d/",time.localtime()), config_dict['exp_name'], 'logs/')
-    checkpoint_dir = os.path.join('experiments', time.strftime("%Y-%m-%d/",time.localtime()), config_dict['exp_name'], 'checkpoints/')
-    return config_dict, log_dir, checkpoint_dir
+    return config_dict
 
-def create_dirs(dirs):
+def create_dirs(config):
     """Create directories if not found
 
     Args:
@@ -44,11 +42,13 @@ def create_dirs(dirs):
     Returns:
         exit_code: 0:success -1:failed
     """
+    log_dir = os.path.join('experiments', time.strftime("%Y-%m-%d/",time.localtime()), config['exp_name'], 'logs/')
+    checkpoint_dir = os.path.join('experiments', time.strftime("%Y-%m-%d/",time.localtime()), config['exp_name'], 'checkpoints/')
     try:
-        for dir_ in dirs:
+        for dir_ in [log_dir, checkpoint_dir]:
             if not os.path.exists(dir_):
                 os.makedirs(dir_)
-        return 0
     except Exception as err:
         print("Creating directories error: {0}".format(err))
-    exit(-1)
+        exit(-1)
+    return log_dir, checkpoint_dir
