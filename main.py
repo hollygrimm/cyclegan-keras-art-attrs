@@ -9,16 +9,11 @@ from trainers.cyclegan_trainer import CycleGANModelTrainer
 def main():
     # get json configuration filepath from the run argument
     # process the json configuration file
-    try:
-        args = get_args()
-        # TODO: Error if args.config doesn't exist
-        config, log_dir, checkpoint_dir = process_config(args.config)
-    except:
-        print('missing or invalid arguments')
-        print('Unexpected error:', sys.exc_info()[0])
+    args = get_args()
+    config = process_config(args.config)
 
     # create the experiment directories
-    create_dirs([log_dir, checkpoint_dir])
+    log_dir, checkpoint_dir = create_dirs(config)
 
     print('Create the data generator')
     data_loader = DataLoader(config)
