@@ -1,79 +1,13 @@
 {
-    "exp_name": "200_256_256_1e-04_1_equal_attrs_5_orange_analogous",
-
     "dataset_name": "portrait2landscape_big",
+
+    "predict_set": "b",
 
     "img_size_x": 256,
     "img_size_y": 256,
 
-    "predict_img_size_x": 384,
-    "predict_img_size_y": 384,
+    "predict_img_size_x": 1280,
+    "predict_img_size_y": 1280,
 
-    "base_lr": 1e-04, 
-    "beta_1": 0.5,
-
-    "weights_path": "experiments/2018-10-12/200_256_256_1e-04_1_equal_attrs_5_orange_analogous/checkpoints/200_256_256_1e-04_1_equal_attrs_5_orange_analogous-02.hdf5",
-    "batch_size": 1, 
-    "initial_epoch": 0,     
-    "nb_epoch": 200,
-    "validation_split": 0.25,
-    "verbose_training": 2,
-
-    "add_perceptual_loss": false,
-
-    "comp_attrs_weights_path": "data/art_composition_cnn_weights.hdf5",
-    "numerical_loss_weights": {
-        "variety_texture": 1.0,
-        "variety_shape": 1.0,
-        "variety_size": 1.0,
-        "variety_color": 1.0,
-        "contrast": 1.0,
-        "repetition": 1.0
-    }, 
-    "categorical_loss_weights": {
-        "pri_color": 0.7,
-        "harmony": 0.7 
-    },
-    "colors": [
-        "black",
-        "blue",
-        "blue-cyan",        
-        "blue-magenta",
-        "cyan",
-        "green",
-        "green-cyan",
-        "green-yellow",
-        "magenta",
-        "orange",
-        "red",        
-        "red-magenta",
-        "yellow"    
-    ],    
-    "harmonies": [
-        "analogous",
-        "complementary",        
-        "monochromatic",
-        "split complementary",
-        "tetradic",
-        "triadic"
-    ],      
-    "numerical_target_attr_values": {
-        "variety_texture": 5,
-        "variety_shape": 5,
-        "variety_size": 5,
-        "variety_color": 5,
-        "contrast": 5,
-        "repetition": 5
-    },  
-    "categorical_target_attr_values": {
-        "pri_color": "orange",
-        "harmony": "analogous"
-    },         
-
-    "checkpoint_monitor": "d_loss",
-    "checkpoint_mode": "min",
-    "checkpoint_save_best_only": false,
-    "checkpoint_save_weights_only": false,
-    "checkpoint_verbose": 1,
-    "tensorboard_write_graph": true
+    "weights_path": "experiments/2018-10-12/200_256_256_1e-04_1_equal_attrs_5_orange_analogous/checkpoints/200_256_256_1e-04_1_equal_attrs_5_orange_analogous-02.hdf5"
 }
