@@ -13,26 +13,29 @@ from keras.layers import Lambda, GlobalAveragePooling2D
 from keras.optimizers import Adagrad
 
 class CycleGANAttrModel(BaseModel):
-    def __init__(self, config):
+    def __init__(self, config, is_train=True):
         super(CycleGANAttrModel, self).__init__(config)
         self.channels = 3
         self.img_size_x = config['img_size_x']
         self.img_size_y = config['img_size_y']
-        self.predict_img_size_x = config['predict_img_size_x']
-        self.predict_img_size_y = config['predict_img_size_y']
         self.img_shape = (self.img_size_x, self.img_size_y, self.channels)
-        self.predict_img_shape = (self.predict_img_size_x, self.predict_img_size_y, self.channels)
         self.weights_path = config['weights_path']
-        self.base_lr = config['base_lr']
-        self.beta_1 = config['beta_1']
-        self.numerical_loss_weights = config['numerical_loss_weights']
-        self.categorical_loss_weights = config['categorical_loss_weights']
-        self.colors = config['colors']
-        self.harmonies = config['harmonies']
-        self.numerical_target_attr_values = config['numerical_target_attr_values']
-        self.categorical_target_attr_values = config['categorical_target_attr_values']
-        self.comp_attrs_weights_path = config['comp_attrs_weights_path']
-        self.add_perceptual_loss = config['add_perceptual_loss']
+
+        if is_train:
+            self.base_lr = config['base_lr']
+            self.beta_1 = config['beta_1']
+            self.numerical_loss_weights = config['numerical_loss_weights']
+            self.categorical_loss_weights = config['categorical_loss_weights']
+            self.colors = config['colors']
+            self.harmonies = config['harmonies']
+            self.numerical_target_attr_values = config['numerical_target_attr_values']
+            self.categorical_target_attr_values = config['categorical_target_attr_values']
+            self.comp_attrs_weights_path = config['comp_attrs_weights_path']
+            self.add_perceptual_loss = config['add_perceptual_loss']
+        else:
+            self.predict_img_size_x = config['predict_img_size_x']
+            self.predict_img_size_y = config['predict_img_size_y']        
+            self.predict_img_shape = (self.predict_img_size_x, self.predict_img_size_y, self.channels)
         
 
     def build_generator(self, shape):
@@ -332,52 +335,56 @@ class CycleGANAttrModel(BaseModel):
                             loss_weights=loss_weights,
                             optimizer=optimizer)
 
-    def build_predict_model(self):
+    def build_predict_model(self, predict_set):
         # Number of filters in first conv layer of generator and discriminator
         self.gf = 32
 
-        # Build the generators
-        self.g_AB = self.build_generator(shape=self.img_shape)
-        self.g_BA = self.build_generator(shape=self.img_shape)
+        inputs = []
+        outputs = []
 
-        # Input images from both domains
-        orig_img_A = Input(shape=self.img_shape)
-        orig_img_B = Input(shape=self.img_shape)
+        if predict_set=='both' or predict_set=='a':
+            self.g_AB = self.build_generator(shape=self.img_shape)
+            orig_img_A = Input(shape=self.img_shape)
+            fake_B = self.g_AB(orig_img_A)
+            inputs.append(orig_img_A)
+            outputs.append(fake_B)
 
-        # Translate images to the other domain
-        fake_B = self.g_AB(orig_img_A)
-        fake_A = self.g_BA(orig_img_B)
+        if predict_set=='both' or predict_set=='b':
+            self.g_BA = self.build_generator(shape=self.img_shape)
+            orig_img_B = Input(shape=self.img_shape)
+            fake_A = self.g_BA(orig_img_B)
+            inputs.append(orig_img_B)
+            outputs.append(fake_A)            
 
-        # Translate images back to original domain
-        # reconstr_A = self.g_BA(fake_B)
-        # reconstr_B = self.g_AB(fake_A)
-
-        # Create Outputs Array
-        outputs = [fake_B, fake_A]  # g_BA(g_AB(img_A)), g_AB(g_BA(img_B))
-
+        print('model inputs:', len(inputs))
         print('model outputs:', len(outputs))
 
         # Combined model trains generators to fool discriminators
-        self.combined = Model(inputs=[orig_img_A, orig_img_B],
+        self.combined = Model(inputs=inputs,
                               outputs=outputs) 
 
         self.combined.load_weights(self.weights_path, by_name=True, skip_mismatch=True)
 
-        # predict model
-        predict_img_A = Input(shape=self.predict_img_shape)
-        predict_img_B = Input(shape=self.predict_img_shape)
+        predict_inputs = []
+        predict_outputs = []
 
-        self.predict_g_AB = self.build_generator(shape=self.predict_img_shape)
-        self.predict_g_BA = self.build_generator(shape=self.predict_img_shape)
+        # predict model, with different size input shape
+        if predict_set=='both' or predict_set=='a':
+            predict_img_A = Input(shape=self.predict_img_shape)
+            self.predict_g_AB = self.build_generator(shape=self.predict_img_shape)
+            predict_fake_B = self.predict_g_AB(predict_img_A)
+            predict_inputs.append(predict_img_A)
+            predict_outputs.append(predict_fake_B)            
+        
+        if predict_set=='both' or predict_set=='b':        
+            predict_img_B = Input(shape=self.predict_img_shape)
+            self.predict_g_BA = self.build_generator(shape=self.predict_img_shape)
+            predict_fake_A = self.predict_g_BA(predict_img_B)
+            predict_inputs.append(predict_img_B)
+            predict_outputs.append(predict_fake_A)                  
 
-        predict_fake_B = self.predict_g_AB(predict_img_A)
-        predict_fake_A = self.predict_g_BA(predict_img_B)
-
-        predict_outputs = [predict_fake_B, predict_fake_A] 
-
-        self.predict = Model(inputs=[predict_img_A, predict_img_B],
+        self.predict = Model(inputs=predict_inputs,
                               outputs=predict_outputs) 
-
 
         for new_layer, layer in zip(self.predict.layers[1:], self.combined.layers[1:]):
             new_layer.set_weights(layer.get_weights())
