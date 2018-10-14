@@ -1,7 +1,7 @@
 {
     "dataset_name": "portrait2landscape_big",
 
-    "predict_set": "b",
+    "predict_set": "both",
 
     "img_size_x": 256,
     "img_size_y": 256,
@@ -9,5 +9,5 @@
     "predict_img_size_x": 1280,
     "predict_img_size_y": 1280,
 
-    "weights_path": "experiments/2018-10-12/200_256_256_1e-04_1_equal_attrs_5_orange_analogous/checkpoints/200_256_256_1e-04_1_equal_attrs_5_orange_analogous-02.hdf5"
+    "weights_path": "experiments/2018-10-13/200_256_256_1e-04_1_equal_attrs_5_orange_analogous/checkpoints/200_256_256_1e-04_1_equal_attrs_5_orange_analogous-201.hdf5"
 }
