@@ -38,7 +38,7 @@ class CycleGANAttrModel(BaseModel):
             self.predict_img_shape = (self.predict_img_size_x, self.predict_img_size_y, self.channels)
         
 
-    def build_generator(self, shape):
+    def build_generator(self, shape, name):
 
         def conv2d(layer_input, filters, f_size=4):
             d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
@@ -69,9 +69,9 @@ class CycleGANAttrModel(BaseModel):
         u4 = UpSampling2D(size=2)(u3)
         output_img = Conv2D(self.channels, kernel_size=4, strides=1, padding='same', activation='tanh')(u4)
 
-        return Model(d0, output_img)
+        return Model(d0, output_img, name=name)
 
-    def build_discriminator(self):
+    def build_discriminator(self, name):
 
         def d_layer(layer_input, filters, f_size=4, normalization=True):
             d = Conv2D(filters, kernel_size=f_size, strides=2, padding='same')(layer_input)
@@ -89,7 +89,7 @@ class CycleGANAttrModel(BaseModel):
 
         validity = Conv2D(1, kernel_size=4, strides=1, padding='same')(d4)
 
-        return Model(img, validity)
+        return Model(img, validity, name=name)
 
     def build_perceptual_model(self, input_shape, trainable=False, pop=True):
         # import ResNet50 pretrained on imagenet
@@ -217,8 +217,8 @@ class CycleGANAttrModel(BaseModel):
         optimizer = Adam(lr=self.base_lr, beta_1=self.beta_1)
 
         # Build and compile the discriminators
-        self.d_A = self.build_discriminator()
-        self.d_B = self.build_discriminator()
+        self.d_A = self.build_discriminator(name="d_A")
+        self.d_B = self.build_discriminator(name="d_B")
         self.d_A.compile(loss='mse',
             optimizer=optimizer,
             metrics=['accuracy'])
@@ -227,8 +227,8 @@ class CycleGANAttrModel(BaseModel):
             metrics=['accuracy'])
 
         # Build the generators
-        self.g_AB = self.build_generator(shape=self.img_shape)
-        self.g_BA = self.build_generator(shape=self.img_shape)
+        self.g_AB = self.build_generator(shape=self.img_shape, name='g_AB')
+        self.g_BA = self.build_generator(shape=self.img_shape, name='g_BA')
 
         # Build the Perceptual Model
         if self.add_perceptual_loss:        
@@ -343,25 +343,25 @@ class CycleGANAttrModel(BaseModel):
         outputs = []
 
         if predict_set=='both' or predict_set=='a':
-            self.g_AB = self.build_generator(shape=self.img_shape)
+            self.g_AB = self.build_generator(shape=self.img_shape, name='g_AB')
             orig_img_A = Input(shape=self.img_shape)
             fake_B = self.g_AB(orig_img_A)
             inputs.append(orig_img_A)
             outputs.append(fake_B)
 
         if predict_set=='both' or predict_set=='b':
-            self.g_BA = self.build_generator(shape=self.img_shape)
+            self.g_BA = self.build_generator(shape=self.img_shape, name='g_BA')
             orig_img_B = Input(shape=self.img_shape)
             fake_A = self.g_BA(orig_img_B)
             inputs.append(orig_img_B)
-            outputs.append(fake_A)            
+            outputs.append(fake_A)   
 
         print('model inputs:', len(inputs))
         print('model outputs:', len(outputs))
 
         # Combined model trains generators to fool discriminators
         self.combined = Model(inputs=inputs,
-                              outputs=outputs) 
+                              outputs=outputs)
 
         self.combined.load_weights(self.weights_path, by_name=True, skip_mismatch=True)
 
@@ -371,14 +371,14 @@ class CycleGANAttrModel(BaseModel):
         # predict model, with different size input shape
         if predict_set=='both' or predict_set=='a':
             predict_img_A = Input(shape=self.predict_img_shape)
-            self.predict_g_AB = self.build_generator(shape=self.predict_img_shape)
+            self.predict_g_AB = self.build_generator(shape=self.predict_img_shape, name='g_AB')
             predict_fake_B = self.predict_g_AB(predict_img_A)
             predict_inputs.append(predict_img_A)
             predict_outputs.append(predict_fake_B)            
         
         if predict_set=='both' or predict_set=='b':        
             predict_img_B = Input(shape=self.predict_img_shape)
-            self.predict_g_BA = self.build_generator(shape=self.predict_img_shape)
+            self.predict_g_BA = self.build_generator(shape=self.predict_img_shape, name='g_BA')
             predict_fake_A = self.predict_g_BA(predict_img_B)
             predict_inputs.append(predict_img_B)
             predict_outputs.append(predict_fake_A)                  
