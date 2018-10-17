@@ -72,7 +72,7 @@ Or train your own weights using this repository: https://github.com/hollygrimm/a
 bash download_dataset.sh apple2orange
 ```
 
-Minimum image size for training or predicting is 16x16 pixels. When training your own dataset, the number of images in the trainA folder, should be equal to or less than the number of images in trainB folder.
+Minimum image size for training or predicting is 16x16 pixels (size of Patch-GAN patch). When training your own dataset, the number of images in the trainA folder, should be equal to or less than the number of images in trainB folder.
 
 With a batch size of 1, here are the maximum image sizes that train on various GPU sizes:
 
