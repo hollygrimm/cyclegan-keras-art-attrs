@@ -27,11 +27,8 @@ python main.py -c params/pri_color/blue-cyan.json | python main.py -c params/pri
 
 Error message 'ValueError: axes don't match array' during load_weights unless older version of Keras and keras-contrib installed. See https://stackoverflow.com/questions/51944836/keras-load-model-valueerror-axes-dont-match-array
 
-* Keras 2.1.5
+* Keras
 * keras-contrib
-    * cd keras-contrib
-    * git reset --hard 3427000d9fa21561c31c01479fa74fba1a36ab08
-    * python setup.py install
 * pillow
 * imageio
 * pandas
@@ -57,7 +54,6 @@ chmod +x aws-setup.sh
 source activate tensorflow_p36
 git clone https://www.github.com/keras-team/keras-contrib.git
 cd keras-contrib
-git reset --hard 3427000d9fa21561c31c01479fa74fba1a36ab08
 python setup.py install
 ```
 
