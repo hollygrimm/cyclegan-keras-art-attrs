@@ -29,7 +29,7 @@ def main():
 
     # TODO: Iterate through entire test datasets and write results to folder
     if predict_set=='both' or predict_set=='a':
-        testA_datagen = DataGenerator(img_filenames=data_loader.get_testA_data(), batch_size=1, target_size=(config['predict_img_size_x'], config['predict_img_size_y']))
+        testA_datagen = DataGenerator(img_filenames=data_loader.get_testA_data(), batch_size=1, target_size=(config['predict_img_height'], config['predict_img_width']))
         testA_generator = iter(testA_datagen)
         imgs_A = next(testA_generator)
         fake_B = model.predict_g_AB.predict(imgs_A)
@@ -40,7 +40,7 @@ def main():
         imageio.imwrite("images/%s/a_recon.png" % (config['dataset_name']), ((reconstr_A[0]+1)*127.5).astype(np.uint8))
 
     if predict_set=='both' or predict_set=='b':
-        testB_datagen = DataGenerator(img_filenames=data_loader.get_testB_data(), batch_size=1, target_size=(config['predict_img_size_x'], config['predict_img_size_y']))
+        testB_datagen = DataGenerator(img_filenames=data_loader.get_testB_data(), batch_size=1, target_size=(config['predict_img_height'], config['predict_img_width']))
         testB_generator = iter(testB_datagen)
         imgs_B = next(testB_generator)    
         fake_A = model.predict_g_BA.predict(imgs_B)

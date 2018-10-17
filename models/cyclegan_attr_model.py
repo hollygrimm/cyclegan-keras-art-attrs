@@ -16,9 +16,9 @@ class CycleGANAttrModel(BaseModel):
     def __init__(self, config, is_train=True):
         super(CycleGANAttrModel, self).__init__(config)
         self.channels = 3
-        self.img_size_x = config['img_size_x']
-        self.img_size_y = config['img_size_y']
-        self.img_shape = (self.img_size_x, self.img_size_y, self.channels)
+        self.img_height = config['img_height']
+        self.img_width = config['img_width']
+        self.img_shape = (self.img_height, self.img_width, self.channels)
         self.weights_path = config['weights_path']
 
         if is_train:
@@ -33,9 +33,9 @@ class CycleGANAttrModel(BaseModel):
             self.comp_attrs_weights_path = config['comp_attrs_weights_path']
             self.add_perceptual_loss = config['add_perceptual_loss']
         else:
-            self.predict_img_size_x = config['predict_img_size_x']
-            self.predict_img_size_y = config['predict_img_size_y']        
-            self.predict_img_shape = (self.predict_img_size_x, self.predict_img_size_y, self.channels)
+            self.predict_img_height = config['predict_img_height']
+            self.predict_img_width = config['predict_img_width']        
+            self.predict_img_shape = (self.predict_img_height, self.predict_img_width, self.channels)
         
 
     def build_generator(self, shape, name):
@@ -200,9 +200,9 @@ class CycleGANAttrModel(BaseModel):
     def build_model(self):
         # Calculate output shape of the Discriminator
         # using Patch-GAN that looks at 16x16 patches
-        patch_x = int(self.img_size_x / 2**4)
-        patch_y = int(self.img_size_y / 2**4)
-        self.disc_patch = (patch_x, patch_y, 1)
+        patch_height = int(self.img_height / 2**4)
+        patch_width = int(self.img_width / 2**4)
+        self.disc_patch = (patch_height, patch_width, 1)
 
         # Number of filters in first conv layer of generator and discriminator
         self.gf = 32
