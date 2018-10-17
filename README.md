@@ -72,28 +72,27 @@ Or train your own weights using this repository: https://github.com/hollygrimm/a
 bash download_dataset.sh apple2orange
 ```
 
-With a batch size of 1, here are the image sizes that train on various GPU sizes:
+Minimum image size for training or predicting is 16x16 pixels. When training your own dataset, the number of images in the trainA folder, should be equal to or less than the number of images in trainB folder.
+
+With a batch size of 1, here are the maximum image sizes that train on various GPU sizes:
 
 | GPU        | Img Size    | Trains?  |
 |:------------- |:-------------|:-----|
-|2 GiB|320x384|No, OOM|
+|2 GiB|320x320|No, OOM|
 |2 GiB|256x256|Yes|
 |12 GiB|1024x1024|No, OOM|
 |12 GiB|768x768|Yes|
-|12 GiB|720x880|Yes|
-|12 GiB|640x480|Yes|
-|12 GiB|320x384|Yes|
 |16 GiB|1280x1280|No, OOM|
 |16 GiB|1024x1024|Yes|
 
-
-When running prediction, here are the predict image sizes for various GPU sizes:
+When running prediction, here are the maximum predict image sizes for various GPU sizes:
 
 | GPU        | Predict Img Size    | Predicts? |
 |:------------- |:-------------|:-----|
 |2 GiB|1408x1408|No, OOM|
 |2 GiB|1344x1344|Yes|
-|12 GiB|?|?|
+|12 GiB|4096x4096|No, OOM|
+|12 GiB|4032x4032|Yes|
 |16 GiB|?|?|
 
 
