@@ -198,8 +198,8 @@ class CycleGANAttrModel(BaseModel):
         return loss
 
     def build_model(self):
-        # Calculate output shape of the Discriminator (PatchGAN)
-        # TODO: Verify rectangular kernels used here:
+        # Calculate output shape of the Discriminator
+        # using Patch-GAN that looks at 16x16 patches
         patch_x = int(self.img_size_x / 2**4)
         patch_y = int(self.img_size_y / 2**4)
         self.disc_patch = (patch_x, patch_y, 1)
