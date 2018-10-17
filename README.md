@@ -72,7 +72,7 @@ Or train your own weights using this repository: https://github.com/hollygrimm/a
 bash download_dataset.sh apple2orange
 ```
 
-With a batch size of 1, here are the image sizes that I was able to train on various GPU sizes:
+With a batch size of 1, here are the image sizes that train on various GPU sizes:
 
 | GPU        | Img Size    | Trains?  |
 |:------------- |:-------------|:-----|
@@ -87,11 +87,15 @@ With a batch size of 1, here are the image sizes that I was able to train on var
 |16 GiB|1024x1024|Yes|
 
 
-| GPU        | Predict Img Size    | Predict Both A & B? (with Reconstruction) | Predict Only One? |
+When running prediction, here are the predict image sizes for various GPU sizes:
+
+| GPU        | Predict Img Size    | Predicts? |
 |:------------- |:-------------|:-----|
-|2 GiB|1536x1536|No, OOM|No, OOM|
-|2 GiB|1280x1280|Yes|Yes|
-|2 GiB|1024x1024|Yes|Yes|
+|2 GiB|1408x1408|No, OOM|
+|2 GiB|1344x1344|Yes|
+|12 GiB|?|?|
+|16 GiB|?|?|
+
 
 
 ## Run Training
