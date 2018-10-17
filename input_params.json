@@ -1,7 +1,8 @@
 {
     "exp_name": "200_256_256_1e-04_1_equal_attrs_5_orange_analogous",
 
-    "dataset_name": "portrait2landscape_big",
+    "dataset_name": "apple2orange",
+    "sample_interval": 200,
 
     "img_size_x": 256,
     "img_size_y": 256,

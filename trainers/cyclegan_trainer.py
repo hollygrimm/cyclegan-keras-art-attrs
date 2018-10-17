@@ -52,8 +52,7 @@ class CycleGANModelTrainer(BaseTrain):
             experiment.log_multiple_params(self.config)
             self.callbacks.append(experiment.get_keras_callback())      
 
-    # TODO: sample_interval from input_params.json
-    def train(self, sample_interval=20):
+    def train(self):
         start_time = datetime.datetime.now()
         epoch = 0
         epochs = self.config['nb_epoch']
@@ -180,7 +179,7 @@ class CycleGANModelTrainer(BaseTrain):
                 steps_done += 1
 
                 # If at save interval => save generated image samples
-                if steps_done % sample_interval == 0:
+                if steps_done % self.config['sample_interval'] == 0:
                     self.sample_images(epoch, steps_done)
             epoch += 1
 
