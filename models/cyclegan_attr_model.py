@@ -339,32 +339,6 @@ class CycleGANAttrModel(BaseModel):
         # Number of filters in first conv layer of generator and discriminator
         self.gf = 32
 
-        inputs = []
-        outputs = []
-
-        if predict_set=='both' or predict_set=='a':
-            self.g_AB = self.build_generator(shape=self.img_shape, name='g_AB')
-            orig_img_A = Input(shape=self.img_shape)
-            fake_B = self.g_AB(orig_img_A)
-            inputs.append(orig_img_A)
-            outputs.append(fake_B)
-
-        if predict_set=='both' or predict_set=='b':
-            self.g_BA = self.build_generator(shape=self.img_shape, name='g_BA')
-            orig_img_B = Input(shape=self.img_shape)
-            fake_A = self.g_BA(orig_img_B)
-            inputs.append(orig_img_B)
-            outputs.append(fake_A)   
-
-        print('model inputs:', len(inputs))
-        print('model outputs:', len(outputs))
-
-        # Combined model trains generators to fool discriminators
-        self.combined = Model(inputs=inputs,
-                              outputs=outputs)
-
-        self.combined.load_weights(self.weights_path, by_name=True, skip_mismatch=True)
-
         predict_inputs = []
         predict_outputs = []
 
@@ -386,7 +360,7 @@ class CycleGANAttrModel(BaseModel):
         self.predict = Model(inputs=predict_inputs,
                               outputs=predict_outputs) 
 
-        for new_layer, layer in zip(self.predict.layers[1:], self.combined.layers[1:]):
-            new_layer.set_weights(layer.get_weights())
+        self.predict.load_weights(self.weights_path, by_name=True)
+
 
 
