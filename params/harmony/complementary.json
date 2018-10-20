@@ -2,6 +2,7 @@
     "exp_name": "200_256_1e-04_1_harmony_complementary_10.0",
 
     "dataset_name": "apple2orange",
+    "sample_interval": 200,    
 
     "img_height": 256,
     "img_width": 256,
