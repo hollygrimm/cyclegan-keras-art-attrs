@@ -94,7 +94,8 @@ When running prediction, here are the maximum predict image sizes for various GP
 |12 GiB|4096x4096|No, OOM|
 |12 GiB|4032x4032|Yes|
 |16 GiB|4832x4832|No, OOM|
-|16 GiB|4816x4816|Yes|
+|16 GiB|4816x4816|Yes (a or b, not both)
+|16 GiB|4800x4800|Yes (both)
 
 
 
