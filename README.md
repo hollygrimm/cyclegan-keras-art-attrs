@@ -20,8 +20,8 @@ python main.py -c params/contrast/1.json | python main.py -c params/contrast/10.
 ![Contrast 1](assets/contrast_1_600.jpg) | ![Contrast 10](assets/contrast_10_600.jpg)
 python main.py -c params/repetition/1.json | python main.py -c params/repetition/10.json
 ![Repetition 1](assets/repetition_1_600.jpg) | ![Repetition 10](assets/repetition_10_600.jpg)
-python main.py -c params/pri_color/blue-cyan.json | python main.py -c params/pri_color/green-yellow.json
-![Primary Color Blue-Cyan](assets/blue_cyan_600.jpg) | ![Primary Color Green-Yellow](assets/200_256_1e-04_1_pri_color_green-yellow_10.0.png)
+python main.py -c params/pri_color/blue-cyan.json | python main.py -c params/pri_color/yellow.json
+![Primary Color Blue-Cyan](assets/blue_cyan_600.jpg) | ![Primary Color Yellow](assets/yellow_600.jpg)
 
 ## Requirements
 
