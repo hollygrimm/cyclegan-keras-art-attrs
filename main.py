@@ -19,7 +19,7 @@ def main():
     data_loader = DataLoader(config)
 
     print('Create the model')
-    model = CycleGANAttrModel(config)
+    model = CycleGANAttrModel(config, config['weights_path'])
     model.build_model()
     print('model ready loading data now')
 

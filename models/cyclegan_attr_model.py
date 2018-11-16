@@ -13,13 +13,13 @@ from keras.layers import Lambda, GlobalAveragePooling2D
 from keras.optimizers import Adagrad
 
 class CycleGANAttrModel(BaseModel):
-    def __init__(self, config, is_train=True):
+    def __init__(self, config, weights_path, is_train=True):
         super(CycleGANAttrModel, self).__init__(config)
         self.channels = 3
         self.img_height = config['img_height']
         self.img_width = config['img_width']
         self.img_shape = (self.img_height, self.img_width, self.channels)
-        self.weights_path = config['weights_path']
+        self.weights_path = weights_path
 
         if is_train:
             self.base_lr = config['base_lr']

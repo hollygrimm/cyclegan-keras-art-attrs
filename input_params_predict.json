@@ -9,5 +9,6 @@
     "predict_img_height": 1344,
     "predict_img_width": 1344,
 
-    "weights_path": "experiments/2018-10-13/200_256_256_1e-04_1_equal_attrs_5_orange_analogous/checkpoints/200_256_256_1e-04_1_equal_attrs_5_orange_analogous-201.hdf5"
+    "weights_path": "experiments/2018-10-13/200_256_256_1e-04_1_equal_attrs_5_orange_analogous/checkpoints/200_256_256_1e-04_1_equal_attrs_5_orange_analogous-201.hdf5",
+    "all_weights_in_folder": false
 }
